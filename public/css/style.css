@@ -1,0 +1,1889 @@
+
+/* ------------------------------- 1. TOKENS ------------------------------- */
+:root {
+    /* Warna dasar */
+    --c-ink:            #16302a;
+    --c-ink-soft:       #4d5f59;
+    --c-ink-muted:      #74847e;
+
+    /* Primary: soft sage green */
+    --c-primary:        #3f7a68;
+    --c-primary-strong: #2f5f51;
+    --c-primary-soft:   rgba(63, 122, 104, 0.10);
+    --c-primary-line:   rgba(63, 122, 104, 0.28);
+
+    /* Aksen sekunder: soft blue */
+    --c-accent:         #4a7a9b;
+    --c-accent-soft:    rgba(74, 122, 155, 0.10);
+
+    /* Status (lembut) */
+    --c-ok:             #2f7a5b;
+    --c-ok-bg:          rgba(63, 148, 110, 0.13);
+    --c-ok-line:        rgba(63, 148, 110, 0.28);
+    --c-warn:           #8a6420;
+    --c-warn-bg:        rgba(197, 149, 47, 0.15);
+    --c-warn-line:      rgba(197, 149, 47, 0.30);
+    --c-danger:         #9c4238;
+    --c-danger-bg:      rgba(178, 84, 72, 0.13);
+    --c-danger-line:    rgba(178, 84, 72, 0.28);
+    --c-neutral:        #5c6b73;
+    --c-neutral-bg:     rgba(94, 112, 122, 0.12);
+    --c-neutral-line:   rgba(94, 112, 122, 0.25);
+
+    /* Permukaan: putih polos (tanpa transparansi / blur).
+       Nama variabel --glass-* dipertahankan agar seluruh aturan di bawah tetap berfungsi. */
+    --glass-1:          #ffffff;
+    --glass-2:          #ffffff;
+    --glass-3:          #f7f9f8;
+    --glass-nav:        #ffffff;
+    --glass-field:      #ffffff;
+    --glass-hover:      #f1f5f3;
+
+    --line-soft:        #e6ebe9;
+    --line-strong:      #d9e0dd;
+    --line-hair:        #e6ebe9;
+
+    --blur-lg:          none;
+    --blur-md:          none;
+    --blur-sm:          none;
+
+    /* Bayangan tipis dan sederhana */
+    --sh-1: 0 1px 2px rgba(22, 48, 42, 0.06);
+    --sh-2: 0 1px 3px rgba(22, 48, 42, 0.08), 0 1px 2px rgba(22, 48, 42, 0.04);
+    --sh-3: 0 4px 12px rgba(22, 48, 42, 0.10);
+    --sh-inset: 0 0 0 0 transparent; /* nilai kosong yang valid agar "box-shadow: x, var(--sh-inset)" tetap sah */
+
+    /* Radius (lebih kecil = tampilan lebih tegas dan sederhana) */
+    --r-lg: 12px;
+    --r-md: 10px;
+    --r-sm: 8px;
+    --r-xs: 6px;
+    --r-pill: 999px;
+
+    /* Spacing */
+    --sp-1: 0.35rem;
+    --sp-2: 0.6rem;
+    --sp-3: 0.9rem;
+    --sp-4: 1.25rem;
+    --sp-5: 1.75rem;
+    --sp-6: 2.25rem;
+
+    /* Motion */
+    --t-fast: 0.2s ease;
+    --t-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --t-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --wrap: 1140px;
+}
+
+/* -------------------------------- 2. BASE -------------------------------- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--c-ink);
+    line-height: 1.65;
+    font-size: 15px;
+    letter-spacing: 0.1px;
+    min-height: 100vh;
+    background-color: #f3f5f4;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* Latar polos. Lapisan ::before hanya dipakai halaman login untuk foto (lihat bagian 13b). */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+}
+
+body::after { display: none; }
+
+/* --------------------------- 3. TIPOGRAFI DASAR -------------------------- */
+h1, h2, h3, h4, h5, legend {
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    color: var(--c-ink);
+    line-height: 1.3;
+}
+
+h1 { font-size: 1.55rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.08rem; }
+
+main h2 {
+    padding-bottom: var(--sp-3);
+    margin-bottom: var(--sp-2);
+    position: relative;
+}
+
+main h2::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 54px;
+    height: 3px;
+    border-radius: var(--r-pill);
+    background: var(--c-primary);
+    opacity: 0.75;
+}
+
+main h3 {
+    margin-top: var(--sp-5);
+    margin-bottom: var(--sp-2);
+}
+
+main > div > h2:first-child,
+main > div > h3:first-child { margin-top: 0; }
+
+p { color: var(--c-ink-soft); }
+
+a {
+    color: var(--c-primary-strong);
+    text-decoration: none;
+    transition: color var(--t-fast), opacity var(--t-fast);
+}
+
+a:hover { color: var(--c-primary); }
+
+main p a,
+main small a {
+    border-bottom: 1px solid var(--c-primary-line);
+    padding-bottom: 1px;
+}
+
+main p a:hover { border-bottom-color: var(--c-primary); }
+
+small { line-height: 1.5; }
+
+strong { font-weight: 650; }
+
+::selection {
+    background: rgba(63, 122, 104, 0.18);
+    color: var(--c-ink);
+}
+
+/* ------------------------------ 4. SIDEBAR (rata, menempel di kiri) ------------------------------ */
+:root {
+    --sidebar-w: 264px;
+    --sidebar-gap: 0px;
+}
+
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Panel kaca melayang di sisi kiri */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 200;
+    width: var(--sidebar-w);
+    margin: var(--sidebar-gap);
+    height: calc(100vh - (var(--sidebar-gap) * 2));
+    height: calc(100dvh - (var(--sidebar-gap) * 2));
+    display: flex;
+    flex-direction: column;
+    padding: var(--sp-3);
+    background: var(--glass-nav);
+    border: 0;
+    border-right: 1px solid var(--line-strong);
+    border-radius: 0;
+    box-shadow: none;
+    color: var(--c-ink);
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.35rem 0.5rem var(--sp-3);
+    margin-bottom: var(--sp-2);
+    border-bottom: 1px solid var(--line-hair);
+    color: var(--c-ink);
+}
+
+.sidebar-brand:hover { color: var(--c-ink); }
+
+.sidebar-logo {
+    flex: 0 0 auto;
+    display: block;
+    width: 46px;
+    height: 46px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 5px rgba(22, 48, 42, 0.18));
+}
+
+.sidebar-brand-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.sidebar-brand-text strong {
+    font-size: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.sidebar-brand-text small {
+    font-size: 0.72rem;
+    color: var(--c-ink-muted);
+}
+
+.sidebar-nav {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 0.1rem;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.sidebar-label {
+    display: block;
+    padding: var(--sp-3) 0.65rem 0.4rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-ink-muted);
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid transparent;
+    border-radius: var(--r-sm);
+    font-size: 0.88rem;
+    font-weight: 550;
+    color: var(--c-ink-soft);
+    transition: background var(--t-fast), color var(--t-fast),
+                border-color var(--t-fast), box-shadow var(--t-fast);
+}
+
+.sidebar-link svg,
+.sidebar-logout svg,
+.topbar-toggle svg {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.sidebar-link:hover {
+    color: var(--c-primary-strong);
+    background: var(--glass-hover);
+    border-color: var(--line-strong);
+}
+
+.sidebar-link.active {
+    color: var(--c-primary-strong);
+    font-weight: 650;
+    background: var(--c-primary-soft);
+    border-color: var(--c-primary-line);
+    box-shadow: var(--sh-1), inset 3px 0 0 var(--c-primary);
+}
+
+.sidebar-footer {
+    flex: 0 0 auto;
+    margin-top: var(--sp-2);
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--line-hair);
+}
+
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.35rem 0.4rem var(--sp-2);
+}
+
+.sidebar-avatar {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--c-primary-strong);
+    background: var(--c-primary-soft);
+    border: 1px solid var(--c-primary-line);
+}
+
+.sidebar-user-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.3;
+}
+
+.sidebar-user-text strong {
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sidebar-user-text small {
+    font-size: 0.72rem;
+    color: var(--c-ink-muted);
+}
+
+.sidebar-footer form { margin: 0; }
+
+.sidebar-logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.55rem 0.9rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--c-ink-soft);
+    background: #ffffff;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: background var(--t-fast), color var(--t-fast),
+                border-color var(--t-fast), box-shadow var(--t-fast);
+}
+
+.sidebar-logout:hover {
+    background: var(--glass-hover);
+    color: var(--c-danger);
+    border-color: var(--c-danger-line);
+    box-shadow: var(--sh-1);
+}
+
+/* Kolom konten di sebelah kanan sidebar */
+.app-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-left: calc(var(--sidebar-w) + (var(--sidebar-gap) * 2));
+}
+
+/* Bilah atas (hamburger) + latar gelap: hanya dipakai di layar kecil */
+.topbar,
+.sidebar-backdrop { display: none; }
+
+/* --------------------------- 5. AREA KONTEN ------------------------------ */
+main {
+    display: block;
+    max-width: var(--wrap);
+    margin: 0 auto;
+    padding: var(--sp-4) 1rem var(--sp-6);
+}
+
+/* Panel kaca utama: setiap halaman membungkus isinya dalam satu <div>. */
+main > div {
+    background: var(--glass-1);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-2), var(--sh-inset);
+    padding: var(--sp-5) var(--sp-5) var(--sp-6) !important;
+}
+
+/* Dashboard memakai .container: biarkan transparan agar kartu di dalamnya
+   yang menjadi elemen kaca (hindari kaca berlapis ganda). */
+main > div.container,
+main > .container {
+    max-width: 100%;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0 !important;
+    margin: 0 auto;
+}
+
+.page-header { margin-bottom: var(--sp-4); }
+
+.page-header h1 {
+    font-size: 1.5rem;
+    color: var(--c-ink);
+}
+
+.page-header p {
+    color: var(--c-ink-soft);
+    font-size: 0.92rem;
+}
+
+/* Paragraf keterangan kecil di bawah judul halaman */
+main > div > p:first-of-type {
+    max-width: 82ch;
+}
+
+/* -------------------------- 6. KARTU & GRID ------------------------------ */
+.welcome-box {
+    position: relative;
+    overflow: hidden;
+    background: #10612b;
+    color: #ffffff;
+    padding: var(--sp-5);
+    border: 0;
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-3);
+    margin-bottom: var(--sp-4);
+}
+
+.welcome-box h1,
+.welcome-box h3 { color: #ffffff; }
+
+.welcome-box h1 {
+    font-size: 1.45rem;
+    margin-top: 0.5rem;
+}
+
+.welcome-box p {
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 0.93rem;
+    margin-top: 0.3rem;
+}
+
+.role-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: #ffffff;
+    padding: 0.22rem 0.7rem;
+    border-radius: var(--r-pill);
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--sp-4);
+}
+
+.card,
+.form-card,
+.calendar-card,
+.login-card {
+    background: var(--glass-1);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-1), var(--sh-inset);
+    padding: var(--sp-5);
+    transition: transform var(--t-base), box-shadow var(--t-base),
+                background var(--t-base), border-color var(--t-base);
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+}
+
+.card:hover {
+    background: var(--glass-hover);
+    border-color: var(--c-primary-line);
+    box-shadow: var(--sh-3), var(--sh-inset);
+}
+
+.card h3 {
+    margin: 0 0 var(--sp-2);
+    color: var(--c-ink);
+}
+
+.card p {
+    color: var(--c-ink-soft);
+    font-size: 0.9rem;
+    margin-bottom: var(--sp-4);
+    flex: 1 1 auto;
+}
+
+.card .btn-primary { align-self: flex-start; }
+
+/* ----------------------------- 7. TOMBOL -------------------------------- */
+main button,
+main input[type="submit"],
+.btn-primary,
+.btn-secondary,
+.btn-sm {
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: var(--r-sm);
+    transition: background var(--t-fast), color var(--t-fast),
+                box-shadow var(--t-fast), transform var(--t-fast),
+                border-color var(--t-fast);
+}
+
+main button,
+main input[type="submit"],
+.btn-primary {
+    display: inline-block;
+    padding: 0.6rem 1.15rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #ffffff;
+    background: var(--c-primary-strong);
+    border: 1px solid var(--c-primary-strong);
+    box-shadow: none;
+    text-decoration: none;
+}
+
+.btn-primary { color: #ffffff !important; }
+
+main button:hover,
+main input[type="submit"]:hover,
+.btn-primary:hover {
+    background: var(--c-primary);
+    box-shadow: none;
+}
+
+main button:active,
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(22, 48, 42, 0.12);
+}
+
+.btn-secondary {
+    background: #ffffff;
+    color: var(--c-ink-soft);
+    padding: 0.6rem 1.15rem;
+    border: 1px solid var(--line-strong);
+    font-weight: 600;
+    font-size: 0.88rem;
+    box-shadow: var(--sh-1);
+}
+
+.btn-secondary:hover {
+    background: var(--glass-hover);
+    color: var(--c-ink);
+}
+
+.btn-sm {
+    background: var(--c-primary-strong);
+    color: #fff;
+    border: 1px solid transparent;
+    padding: 0.32rem 0.7rem;
+    border-radius: var(--r-xs);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.btn-block { width: 100%; }
+
+/* Tombol aksi berwarna (warna asli di inline style) dilembutkan
+   agar selaras dengan palet, tanpa mengubah makna atau teksnya. */
+main button[style*="#28a745"] {
+    background: #3d8360 !important;
+    border: 1px solid transparent !important;
+    padding: 0.34rem 0.72rem !important;
+    border-radius: var(--r-xs);
+    box-shadow: 0 3px 10px rgba(61, 131, 96, 0.20);
+}
+
+main button[style*="#dc3545"] {
+    background: #ab554b !important;
+    border: 1px solid transparent !important;
+    padding: 0.34rem 0.72rem !important;
+    border-radius: var(--r-xs);
+    box-shadow: 0 3px 10px rgba(171, 85, 75, 0.18);
+}
+
+main button[style*="#6c757d"] {
+    background: #66737a !important;
+    border: 1px solid transparent !important;
+    padding: 0.34rem 0.72rem !important;
+    border-radius: var(--r-xs);
+    box-shadow: 0 3px 10px rgba(102, 115, 122, 0.18);
+}
+
+/* Tautan WA Warning (inline hijau) */
+main a[style*="#25D366"],
+main a[style*="#25d366"] {
+    display: inline-block;
+    background: #35895a !important;
+    color: #ffffff !important;
+    padding: 0.34rem 0.7rem !important;
+    border-radius: var(--r-xs) !important;
+    font-weight: 600;
+    border: 1px solid transparent;
+    box-shadow: 0 3px 10px rgba(53, 137, 90, 0.20);
+    transition: transform var(--t-fast), box-shadow var(--t-fast), filter var(--t-fast);
+}
+
+main a[style*="#25D366"]:hover,
+main a[style*="#25d366"]:hover {
+    box-shadow: 0 6px 16px rgba(53, 137, 90, 0.26);
+}
+
+.link-wa {
+    color: #2f7a5b;
+    font-size: 0.8rem;
+    font-weight: 650;
+    display: block;
+    margin-top: 0.2rem;
+    text-decoration: none;
+}
+
+/* ------------------------------- 8. FORM -------------------------------- */
+fieldset {
+    position: relative;
+    background: var(--glass-2);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-md);
+    box-shadow: var(--sh-1), var(--sh-inset);
+    padding: var(--sp-4) var(--sp-4) var(--sp-3) !important;
+    margin-bottom: var(--sp-5) !important;
+}
+
+legend {
+    padding: 0.3rem 0.85rem;
+    background: #ffffff;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-pill);
+    font-size: 0.86rem;
+    color: var(--c-primary-strong);
+    box-shadow: var(--sh-1);
+}
+
+legend strong { font-weight: 650; }
+
+.form-group { margin-bottom: var(--sp-3); }
+
+main form p { margin-bottom: var(--sp-3); }
+
+main label,
+.form-group label {
+    display: inline-block;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: var(--c-ink-soft);
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.01em;
+}
+
+main input[type="text"],
+main input[type="password"],
+main input[type="date"],
+main input[type="time"],
+main input[type="number"],
+main input[type="email"],
+main input[type="search"],
+main select,
+main textarea,
+.form-control {
+    font-family: inherit;
+    font-size: 0.88rem;
+    color: var(--c-ink);
+    background: var(--glass-field);
+    border: 1px solid rgba(22, 48, 42, 0.13);
+    border-radius: var(--r-sm);
+    padding: 0.55rem 0.8rem;
+    box-shadow: inset 0 1px 2px rgba(22, 48, 42, 0.03);
+    transition: border-color var(--t-fast), box-shadow var(--t-fast),
+                background var(--t-fast);
+    max-width: 100%;
+}
+
+.form-control { width: 100%; }
+
+main textarea {
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 84px;
+}
+
+main select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 2.1rem;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%234d5f59' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    cursor: pointer;
+}
+
+main input:hover,
+main select:hover,
+main textarea:hover {
+    border-color: rgba(22, 48, 42, 0.2);
+    background: #ffffff;
+}
+
+main input:focus,
+main select:focus,
+main textarea:focus,
+.form-control:focus {
+    outline: none;
+    background: #ffffff;
+    border-color: var(--c-primary);
+    box-shadow: 0 0 0 3px var(--c-primary-soft);
+}
+
+main input::placeholder,
+main textarea::placeholder {
+    color: var(--c-ink-muted);
+    opacity: 0.85;
+}
+
+/* Input berkas */
+main input[type="file"] {
+    font-family: inherit;
+    font-size: 0.84rem;
+    color: var(--c-ink-soft);
+    background: var(--glass-field);
+    border: 1px dashed rgba(22, 48, 42, 0.18);
+    border-radius: var(--r-sm);
+    padding: 0.5rem 0.7rem;
+    max-width: 100%;
+    transition: border-color var(--t-fast), background var(--t-fast);
+}
+
+main input[type="file"]:hover {
+    border-color: var(--c-primary-line);
+    background: var(--glass-hover);
+}
+
+main input[type="file"]::file-selector-button {
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--c-primary-strong);
+    background: #f1f5f3;
+    border: 1px solid var(--c-primary-line);
+    border-radius: var(--r-xs);
+    padding: 0.35rem 0.75rem;
+    margin-right: 0.7rem;
+    cursor: pointer;
+    transition: background var(--t-fast), color var(--t-fast);
+}
+
+main input[type="file"]::file-selector-button:hover {
+    background: var(--c-primary);
+    color: #ffffff;
+    border-color: transparent;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--sp-2);
+}
+
+main form small,
+main fieldset small {
+    color: var(--c-ink-muted);
+    font-size: 0.79rem;
+}
+
+/* Fokus keyboard yang bersih untuk aksesibilitas */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--c-primary);
+    outline-offset: 2px;
+    border-radius: var(--r-xs);
+}
+
+/* ------------------------------- 9. TABEL ------------------------------- */
+/* Aturan tabel umum TIDAK berlaku untuk tabel internal FullCalendar (kelas fc-*):
+   padding/border !important dan min-width 720px di HP merusak kisi kalender. */
+main table:not([class*="fc-"]) {
+    width: 100%;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border: 1px solid var(--line-strong) !important;
+    border-radius: var(--r-md);
+    overflow: hidden;
+    background: var(--glass-3);
+    box-shadow: var(--sh-1), var(--sh-inset);
+    margin-top: var(--sp-3);
+    font-size: 0.86rem;
+}
+
+main table:not([class*="fc-"]) thead {
+    background: #f3f6f5;
+}
+
+main table:not([class*="fc-"]) th {
+    border: none !important;
+    border-bottom: 1px solid var(--line-hair) !important;
+    padding: 0.8rem 0.9rem !important;
+    text-align: left;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+    color: var(--c-primary-strong);
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+main table:not([class*="fc-"]) td {
+    border: none !important;
+    border-bottom: 1px solid rgba(22, 48, 42, 0.07) !important;
+    padding: 0.75rem 0.9rem !important;
+    vertical-align: top;
+    color: var(--c-ink);
+}
+
+main table:not([class*="fc-"]) tbody tr {
+    background: #ffffff;
+    transition: background var(--t-fast);
+}
+
+main table:not([class*="fc-"]) tbody tr:nth-child(even) {
+    background: #fafbfa;
+}
+
+main table:not([class*="fc-"]) tbody tr:hover {
+    background: #f1f5f3;
+}
+
+main table:not([class*="fc-"]) tbody tr:last-child td { border-bottom: none !important; }
+
+/* Baris melewati batas waktu (inline #fff4f4) dilembutkan */
+main table:not([class*="fc-"]) tbody tr[style*="fff4f4"] {
+    background: rgba(196, 116, 105, 0.09) !important;
+    box-shadow: inset 3px 0 0 rgba(171, 85, 75, 0.42);
+}
+
+main table:not([class*="fc-"]) tbody tr[style*="fff4f4"]:hover {
+    background: rgba(196, 116, 105, 0.15) !important;
+}
+
+main table:not([class*="fc-"]) td small { color: var(--c-ink-muted); }
+
+/* Kolom aksi: elemen kecil dibuat rapi & tetap terbaca */
+main table:not([class*="fc-"]) td form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.4rem !important;
+}
+
+main table:not([class*="fc-"]) td form:last-child { margin-bottom: 0 !important; }
+
+main table:not([class*="fc-"]) td select,
+main table:not([class*="fc-"]) td input[type="text"],
+main table:not([class*="fc-"]) td input[type="date"],
+main table:not([class*="fc-"]) td input[type="time"],
+main table:not([class*="fc-"]) td input[type="file"] {
+    font-size: 0.79rem !important;
+    padding: 0.35rem 0.55rem;
+    border-radius: var(--r-xs);
+}
+
+main table:not([class*="fc-"]) td select { padding-right: 1.8rem; }
+
+main table:not([class*="fc-"]) td button {
+    font-size: 0.79rem !important;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--r-xs);
+}
+
+main table:not([class*="fc-"]) td small { display: inline-block; }
+
+/* Panel edit ringkas di dalam sel tabel menyesuaikan lebar isinya */
+main table:not([class*="fc-"]) td details {
+    display: inline-block;
+    max-width: 100%;
+}
+
+/* Baris kosong */
+main table:not([class*="fc-"]) td[colspan] {
+    text-align: center;
+    color: var(--c-ink-muted);
+    padding: 1.6rem 1rem !important;
+}
+
+/* Kelas tabel lama */
+.table-wrapper {
+    background: var(--glass-3);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-md);
+    overflow-x: auto;
+    box-shadow: var(--sh-1), var(--sh-inset);
+    margin-top: var(--sp-3);
+}
+
+.table { width: 100%; border-collapse: collapse; }
+
+.img-thumb {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: var(--r-xs);
+    border: 1px solid var(--line-strong);
+    box-shadow: var(--sh-1);
+}
+
+.sub-text {
+    font-size: 0.78rem;
+    color: var(--c-ink-muted);
+}
+
+/* ---------------------- 10. BADGE STATUS (LEMBUT) ----------------------- */
+/* Badge dibentuk dari elemen status yang sudah ada — teksnya tidak diubah. */
+main table:not([class*="fc-"]) td > strong:first-child,
+main table:not([class*="fc-"]) td > span[style*="color"],
+main table:not([class*="fc-"]) td > span[style*="Read-Only"] {
+    display: inline-block;
+    padding: 0.22rem 0.7rem;
+    border-radius: var(--r-pill);
+    font-size: 0.77rem !important;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+    line-height: 1.5;
+    white-space: nowrap;
+    background: var(--c-neutral-bg);
+    border: 1px solid var(--c-neutral-line);
+}
+
+/* Approved / hijau */
+main table:not([class*="fc-"]) td > span[style*="color: green"],
+main table:not([class*="fc-"]) td > span[style*="color:green"] {
+    color: var(--c-ok) !important;
+    background: var(--c-ok-bg);
+    border-color: var(--c-ok-line);
+}
+
+/* Rejected / merah */
+main table:not([class*="fc-"]) td > span[style*="#c0392b"] {
+    color: var(--c-danger) !important;
+    background: var(--c-danger-bg);
+    border-color: var(--c-danger-line);
+}
+
+/* Pending / kuning */
+main table:not([class*="fc-"]) td > span[style*="#b8860b"] {
+    color: var(--c-warn) !important;
+    background: var(--c-warn-bg);
+    border-color: var(--c-warn-line);
+}
+
+/* Read-Only / abu */
+main table:not([class*="fc-"]) td > span[style*="gray"] {
+    color: var(--c-neutral) !important;
+    background: var(--c-neutral-bg);
+    border-color: var(--c-neutral-line);
+    font-size: 0.77rem !important;
+}
+
+/* Status perbaikan pengaduan (teks tebal pada kolom status) */
+main table:not([class*="fc-"]) td > strong:first-child {
+    color: var(--c-primary-strong);
+    background: var(--c-primary-soft);
+    border-color: var(--c-primary-line);
+}
+
+/* Warna lembut per status perbaikan — teks status tidak diubah. */
+main table:not([class*="fc-"]) td > strong[data-status="Belum Diperbaiki"] {
+    color: var(--c-danger);
+    background: var(--c-danger-bg);
+    border-color: var(--c-danger-line);
+}
+
+main table:not([class*="fc-"]) td > strong[data-status="Menunggu Spare Part"] {
+    color: var(--c-warn);
+    background: var(--c-warn-bg);
+    border-color: var(--c-warn-line);
+}
+
+main table:not([class*="fc-"]) td > strong[data-status="Sudah Diperbaiki"] {
+    color: var(--c-ok);
+    background: var(--c-ok-bg);
+    border-color: var(--c-ok-line);
+}
+
+/* Catatan kecil berwarna di dalam sel: dibuat halus, teks tetap sama */
+main table:not([class*="fc-"]) td small[style*="#c0392b"] { color: var(--c-danger) !important; }
+main table:not([class*="fc-"]) td small[style*="#27ae60"] { color: var(--c-ok) !important; }
+main table:not([class*="fc-"]) td small[style*="#666"]    { color: var(--c-ink-muted) !important; }
+main table:not([class*="fc-"]) td small[style*="orange"]  { color: var(--c-warn) !important; }
+
+/* -------------------------- 11. ALERT / NOTIFIKASI ---------------------- */
+main > div > div[style*="color: green"],
+main > div > div[style*="color: red"],
+.alert {
+    border-radius: var(--r-sm);
+    padding: 0.7rem 1rem !important;
+    margin-bottom: var(--sp-3) !important;
+    font-size: 0.87rem;
+    font-weight: 550;
+    border: 1px solid transparent;
+    box-shadow: var(--sh-1);
+}
+
+main > div > div[style*="color: green"] {
+    color: var(--c-ok) !important;
+    background: var(--c-ok-bg);
+    border-color: var(--c-ok-line);
+    box-shadow: var(--sh-1), inset 3px 0 0 rgba(63, 148, 110, 0.5);
+}
+
+main > div > div[style*="color: red"] {
+    color: var(--c-danger) !important;
+    background: var(--c-danger-bg);
+    border-color: var(--c-danger-line);
+    box-shadow: var(--sh-1), inset 3px 0 0 rgba(178, 84, 72, 0.5);
+}
+
+main > div > div[style*="color: red"] ul {
+    margin: 0;
+    padding-left: 1.15rem;
+}
+
+main > div > div[style*="color: red"] li { margin: 0.1rem 0; }
+
+/* Pesan error pada halaman login (paragraf inline merah) */
+main p[style*="color: red"] {
+    color: var(--c-danger) !important;
+    background: var(--c-danger-bg);
+    border: 1px solid var(--c-danger-line);
+    border-radius: var(--r-sm);
+    padding: 0.65rem 0.9rem;
+    margin-bottom: var(--sp-3);
+    font-size: 0.87rem;
+}
+
+.alert-success {
+    background: var(--c-ok-bg);
+    color: var(--c-ok);
+    border-color: var(--c-ok-line);
+}
+
+.alert-danger {
+    background: var(--c-danger-bg);
+    color: var(--c-danger);
+    border-color: var(--c-danger-line);
+}
+
+/* ------------------------- 12. DETAILS / SUMMARY ------------------------ */
+main details {
+    background: #fafbfa;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-sm);
+    padding: 0.4rem 0.6rem;
+    box-shadow: var(--sh-1);
+    transition: background var(--t-fast), border-color var(--t-fast);
+}
+
+main details:hover { background: #f1f5f3; }
+
+main details[open] {
+    background: #ffffff;
+    border-color: var(--c-primary-line);
+}
+
+main details summary {
+    font-size: 0.79rem !important;
+    font-weight: 600;
+    color: var(--c-primary-strong);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+main details summary::-webkit-details-marker { display: none; }
+
+main details summary::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-right: 1.6px solid currentColor;
+    border-bottom: 1.6px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform var(--t-fast);
+}
+
+main details[open] summary::before { transform: rotate(45deg); }
+
+main details form { margin-top: 0.5rem !important; }
+
+/* ------------------------- 13. HALAMAN LOGIN ---------------------------- */
+main > div:has(> form[action*="login"]) {
+    max-width: 430px;
+    margin: 3.5vh auto 0;
+    padding: var(--sp-6) var(--sp-5) var(--sp-5) !important;
+    box-shadow: var(--sh-3), var(--sh-inset);
+}
+
+main > div:has(> form[action*="login"]) h2 {
+    text-align: center;
+    font-size: 1.3rem;
+}
+
+main > div:has(> form[action*="login"]) h2::after {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+main > div:has(> form[action*="login"]) form { margin-top: var(--sp-4); }
+
+main > div:has(> form[action*="login"]) form > div { margin-bottom: var(--sp-3); }
+
+main > div:has(> form[action*="login"]) input[type="text"],
+main > div:has(> form[action*="login"]) input[type="password"] {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+}
+
+main > div:has(> form[action*="login"]) button[type="submit"] {
+    width: 100%;
+    margin-top: var(--sp-2);
+    padding: 0.7rem 1.2rem;
+    font-size: 0.92rem;
+}
+
+/* Kelas login lama */
+.login-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    box-shadow: var(--sh-3), var(--sh-inset);
+}
+
+.login-header h2 {
+    color: var(--c-ink);
+    text-align: center;
+}
+
+.login-header p {
+    font-size: 0.87rem;
+    color: var(--c-ink-soft);
+    margin-bottom: var(--sp-4);
+    text-align: center;
+}
+
+/* --------------------------- 14. KALENDER ------------------------------- */
+/* Catatan: FullCalendar menambahkan kelas .fc pada elemen #rapi-calendar itu
+   sendiri, sehingga penargetan dilakukan langsung dari id tersebut. */
+#rapi-calendar {
+    background: #ffffff !important;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-md);
+    box-shadow: var(--sh-1);
+    padding: var(--sp-3);
+    margin-top: var(--sp-4);
+    font-size: 0.87rem;
+
+    --fc-border-color: rgba(22, 48, 42, 0.10);
+    --fc-page-bg-color: transparent;
+    --fc-today-bg-color: rgba(63, 122, 104, 0.09);
+    --fc-neutral-bg-color: #f7f9f8;
+    --fc-list-event-hover-bg-color: #f1f5f3;
+    --fc-event-bg-color: rgba(63, 122, 104, 0.16);
+    --fc-event-border-color: var(--c-primary-line);
+    --fc-event-text-color: var(--c-primary-strong);
+}
+
+#rapi-calendar .fc-toolbar { gap: 0.6rem; }
+
+#rapi-calendar .fc-toolbar-title {
+    font-size: 1.12rem;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    color: var(--c-ink);
+}
+
+/* Tombol navigasi kalender */
+#rapi-calendar .fc-button,
+#rapi-calendar .fc-button-primary {
+    background: #ffffff !important;
+    background-image: none !important;
+    border: 1px solid var(--line-strong) !important;
+    color: var(--c-ink-soft) !important;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    border-radius: var(--r-xs) !important;
+    box-shadow: var(--sh-1) !important;
+    text-transform: none;
+    padding: 0.4rem 0.8rem !important;
+    transform: none !important;
+    transition: background var(--t-fast), color var(--t-fast),
+                border-color var(--t-fast);
+}
+
+#rapi-calendar .fc-button-group > .fc-button:not(:first-child) {
+    margin-left: 0.25rem;
+}
+
+#rapi-calendar .fc-button:hover,
+#rapi-calendar .fc-button-primary:hover {
+    background: #f1f5f3 !important;
+    color: var(--c-primary-strong) !important;
+    border-color: var(--c-primary-line) !important;
+}
+
+#rapi-calendar .fc-button-primary:disabled {
+    opacity: 0.55;
+    color: var(--c-ink-muted) !important;
+}
+
+#rapi-calendar .fc-button-primary:not(:disabled).fc-button-active,
+#rapi-calendar .fc-button-primary:not(:disabled):active {
+    background: var(--c-primary-strong) !important;
+    background-image: none !important;
+    border-color: transparent !important;
+    color: #ffffff !important;
+    box-shadow: 0 3px 10px rgba(47, 95, 81, 0.20) !important;
+}
+
+#rapi-calendar .fc-button-primary:focus,
+#rapi-calendar .fc-button-primary:not(:disabled):active:focus {
+    box-shadow: 0 0 0 3px var(--c-primary-soft) !important;
+}
+
+/* Kepala kolom hari */
+#rapi-calendar .fc-col-header-cell {
+    background: #f3f6f5;
+    padding: 0.45rem 0;
+}
+
+#rapi-calendar .fc-col-header-cell-cushion {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+    color: var(--c-primary-strong);
+    text-decoration: none;
+}
+
+#rapi-calendar .fc-daygrid-day-number,
+#rapi-calendar .fc-list-day-text,
+#rapi-calendar .fc-list-day-side-text {
+    font-size: 0.8rem;
+    color: var(--c-ink-soft);
+    text-decoration: none;
+    padding: 0.35rem 0.5rem;
+}
+
+#rapi-calendar .fc-day-today .fc-daygrid-day-number {
+    color: var(--c-primary-strong);
+    font-weight: 700;
+}
+
+#rapi-calendar .fc-day-other .fc-daygrid-day-number { opacity: 0.5; }
+
+#rapi-calendar .fc-daygrid-day-frame { transition: background var(--t-fast); }
+
+#rapi-calendar .fc-daygrid-day-frame:hover {
+    background: #f3f6f5;
+}
+
+#rapi-calendar .fc-theme-standard td,
+#rapi-calendar .fc-theme-standard th,
+#rapi-calendar.fc-theme-standard td,
+#rapi-calendar.fc-theme-standard th,
+#rapi-calendar .fc-scrollgrid,
+#rapi-calendar .fc-scrollgrid-section > * {
+    border-color: rgba(22, 48, 42, 0.09);
+}
+
+#rapi-calendar .fc-scrollgrid { border-radius: var(--r-sm); overflow: hidden; }
+
+/* Agenda pada sel tanggal */
+#rapi-calendar .fc-daygrid-dot-event,
+#rapi-calendar .fc-daygrid-block-event,
+#rapi-calendar .fc-timegrid-event,
+#rapi-calendar .fc-h-event {
+    background: rgba(63, 122, 104, 0.14);
+    border: 1px solid var(--c-primary-line);
+    border-left: 3px solid var(--c-primary);
+    border-radius: 8px;
+    color: var(--c-primary-strong);
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 0.12rem 0.4rem;
+    margin: 1px 2px;
+    box-shadow: none;
+    transition: background var(--t-fast), transform var(--t-fast);
+}
+
+#rapi-calendar .fc-daygrid-dot-event:hover,
+#rapi-calendar .fc-daygrid-block-event:hover,
+#rapi-calendar .fc-timegrid-event:hover,
+#rapi-calendar .fc-h-event:hover {
+    background: rgba(63, 122, 104, 0.22);
+}
+
+#rapi-calendar .fc-daygrid-event-dot {
+    border-color: var(--c-primary);
+    border-width: 4px;
+}
+
+#rapi-calendar .fc-event-title,
+#rapi-calendar .fc-event-time {
+    color: inherit;
+    font-weight: 600;
+}
+
+#rapi-calendar .fc-event-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#rapi-calendar .fc-daygrid-event-harness { margin-right: 2px; }
+
+#rapi-calendar .fc-daygrid-more-link {
+    font-size: 0.74rem;
+    font-weight: 650;
+    color: var(--c-primary-strong);
+}
+
+/* Tampilan daftar (listWeek) */
+#rapi-calendar .fc-list {
+    border-color: rgba(22, 48, 42, 0.09);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+}
+
+#rapi-calendar .fc-list-day-cushion { background: #f3f6f5; }
+
+#rapi-calendar .fc-list-event-title a { color: var(--c-ink); font-weight: 600; }
+
+#rapi-calendar .fc-list-event:hover td { background: #f1f5f3; }
+
+#rapi-calendar .fc-list-event-dot { border-color: var(--c-primary); }
+
+#rapi-calendar .fc-timegrid-slot-label-cushion,
+#rapi-calendar .fc-timegrid-axis-cushion {
+    font-size: 0.74rem;
+    color: var(--c-ink-muted);
+}
+
+/* -------------------------- 15. RESPONSIF ------------------------------- */
+/* Tablet */
+@media (max-width: 992px) {
+    body { font-size: 14.5px; }
+
+    main { padding: var(--sp-3) 0.85rem var(--sp-5); }
+
+    main > div { padding: var(--sp-4) var(--sp-4) var(--sp-5) !important; }
+
+    .card-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+
+    .welcome-box { padding: var(--sp-4); }
+
+    /* Tabel dapat digeser horizontal bila ruang kurang */
+    main > div { overflow-x: auto; }
+
+    main table:not([class*="fc-"]) { min-width: 720px; }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    main { padding: var(--sp-3) 0.7rem var(--sp-5); }
+
+    main > div {
+        border-radius: var(--r-md);
+        padding: var(--sp-4) var(--sp-3) var(--sp-4) !important;
+    }
+
+    h1 { font-size: 1.3rem; }
+    h2 { font-size: 1.18rem; }
+    h3 { font-size: 1rem; }
+
+    .welcome-box {
+        padding: var(--sp-4) var(--sp-3);
+        border-radius: var(--r-md);
+    }
+
+    .welcome-box h1 { font-size: 1.2rem; }
+
+    .card-grid { grid-template-columns: 1fr; gap: var(--sp-3); }
+
+    .card, .form-card, .calendar-card {
+        padding: var(--sp-4) var(--sp-3);
+        border-radius: var(--r-md);
+    }
+
+    fieldset { padding: var(--sp-3) !important; }
+
+    main input[type="text"],
+    main input[type="password"],
+    main select,
+    main textarea { width: 100%; }
+
+    main > div:has(> form[action*="login"]) {
+        margin-top: 1vh;
+        padding: var(--sp-5) var(--sp-4) var(--sp-4) !important;
+    }
+
+}
+
+/* Layar sangat lebar */
+@media (min-width: 1400px) {
+    :root { --wrap: 1240px; }
+}
+
+/* --------------------- 15b. RESPONSIF SIDEBAR (OFF-CANVAS) --------------------- */
+@media (max-width: 992px) {
+    .app-content { margin-left: 0; }
+
+    .sidebar {
+        transform: translateX(calc(-100% - var(--sidebar-gap) * 2));
+        transition: transform var(--t-slow);
+        box-shadow: none;
+    }
+
+    body.sidebar-open .sidebar {
+        transform: translateX(0);
+        box-shadow: var(--sh-3), var(--sh-inset);
+    }
+
+    .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 150;
+        background: rgba(22, 48, 42, 0.34);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--t-slow);
+    }
+
+    body.sidebar-open .sidebar-backdrop {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    body.sidebar-open { overflow: hidden; }
+
+    .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 0;
+        padding: 0.5rem 0.85rem;
+        background: #ffffff;
+        border-bottom: 1px solid var(--line-strong);
+    }
+
+    .topbar-toggle {
+        display: grid;
+        place-items: center;
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        color: var(--c-ink-soft);
+        background: #ffffff;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--r-sm);
+        cursor: pointer;
+    }
+
+    .topbar-toggle:hover { color: var(--c-primary-strong); }
+
+    .topbar-logo {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+    }
+
+    .topbar-title {
+        font-size: 1rem;
+        letter-spacing: -0.02em;
+    }
+}
+
+@media (max-width: 640px) {
+    .sidebar { width: min(var(--sidebar-w), calc(100vw - 2.5rem)); }
+}
+
+/* --------------------------- 16. PREFERENSI ----------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+
+/* ------------------------------ 17. CETAK ------------------------------- */
+@media print {
+    body::before, body::after { display: none; }
+    .sidebar, .topbar, .sidebar-backdrop { display: none; }
+    .app-content { margin-left: 0; }
+
+    main > div,
+    main table:not([class*="fc-"]),
+    .card, fieldset {
+        background: #ffffff !important;
+        box-shadow: none !important;
+        border-color: #d5dcd9 !important;
+    }
+}
+
+/* ------------------- 13b. BACKGROUND FOTO HALAMAN LOGIN ------------------- */
+/* Kelas "page-login" dipasang di <body> oleh resources/views/auth/login.blade.php.
+
+   Foto asli kecil (437x375), jadi TIDAK dibentangkan memenuhi layar dalam
+   keadaan tajam (akan pecah). Pembagiannya:
+   - Latar halaman : foto yang sengaja di-blur kuat + digelapkan (suasana).
+   - Kartu login   : foto ditampilkan tajam pada ukuran mendekati aslinya.
+   Atur gelap-terang latar lewat dua angka alpha (0.45 dan 0.68). */
+body.page-login::before {
+    background:
+        linear-gradient(rgba(14, 32, 28, 0.45), rgba(14, 32, 28, 0.68)),
+        url('../images/login-foto-2x.jpg') center / cover no-repeat;
+    filter: blur(9px);
+    transform: scale(1.1); /* menyembunyikan tepi akibat blur */
+}
+
+/* Pola garis halus bawaan tema tidak diperlukan di atas foto */
+body.page-login::after { display: none; }
+
+/* Foto gedung di bagian atas kartu login */
+.login-photo {
+    display: block;
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    object-position: center 30%;
+    margin-bottom: var(--sp-4);
+    border-radius: var(--r-md);
+    border: 1px solid var(--line-strong);
+    box-shadow: var(--sh-1);
+}
+
+/* h2 pertama tidak lagi anak pertama, jadi jarak atasnya dinolkan manual */
+.login-photo + h2 { margin-top: 0; }
+
+@media (max-width: 640px) {
+    .login-photo { height: 140px; }
+}
+
+/* Judul toolbar kalender adalah <h2>: lepaskan dekorasi garis & jarak bawah milik "main h2" */
+#rapi-calendar .fc-toolbar-title {
+    position: static;
+    padding: 0;
+    margin: 0;
+}
+
+#rapi-calendar .fc-toolbar-title::after { content: none; }
+
+/* ------------- 14b. KALENDER: TAMPILAN HP / LAYAR KECIL (<= 768px) ------------- */
+/* Breakpoint sama dengan MOBILE_MAX di resources/views/public/calendar.blade.php.
+   Bulan: tiap agenda jadi titik kecil (judul panjang tidak muat di sel sempit);
+   detailnya ada di tampilan Agenda (daftar) yang dibuka dengan mengetuk tanggal. */
+.calendar-hint { display: none; }
+
+@media (max-width: 768px) {
+    /* Kartu halaman kalender: kurangi bantalan samping supaya kalender lebih lebar */
+    main > div:has(> #rapi-calendar) {
+        padding: var(--sp-3) 0.4rem var(--sp-3) !important;
+    }
+
+    main > div:has(> #rapi-calendar) > h2,
+    main > div:has(> #rapi-calendar) > p { padding: 0 0.45rem; }
+
+    .calendar-hint {
+        display: block;
+        margin-top: 0.35rem;
+        font-size: 0.78rem;
+        color: var(--c-ink-muted);
+    }
+
+    #rapi-calendar {
+        padding: 0.4rem;
+        margin-top: var(--sp-3);
+        font-size: 0.82rem;
+    }
+
+    /* Toolbar atas satu baris: [prev next]  judul  [hari ini] */
+    #rapi-calendar .fc-header-toolbar {
+        flex-wrap: nowrap;
+        gap: 0.4rem;
+        margin-bottom: 0.7rem;
+    }
+
+    #rapi-calendar .fc-toolbar-chunk { min-width: 0; }
+
+    #rapi-calendar .fc-header-toolbar .fc-toolbar-chunk:nth-child(2) {
+        flex: 1 1 auto;
+        text-align: center;
+    }
+
+    #rapi-calendar .fc-toolbar-title {
+        margin: 0;
+        font-size: 0.98rem;
+        line-height: 1.25;
+    }
+
+    #rapi-calendar .fc-button,
+    #rapi-calendar .fc-button-primary {
+        min-height: 36px;
+        padding: 0.4rem 0.65rem;
+        font-size: 0.78rem;
+    }
+
+    /* Pilihan tampilan (Bulan | Agenda): tombol sejajar selebar kartu */
+    #rapi-calendar .fc-footer-toolbar { margin-top: 0.7rem; }
+
+    #rapi-calendar .fc-footer-toolbar .fc-toolbar-chunk { display: none; }
+
+    #rapi-calendar .fc-footer-toolbar .fc-toolbar-chunk:nth-child(2) {
+        display: block;
+        width: 100%;
+    }
+
+    #rapi-calendar .fc-footer-toolbar .fc-button-group {
+        display: flex;
+        width: 100%;
+    }
+
+    #rapi-calendar .fc-footer-toolbar .fc-button-group > .fc-button {
+        flex: 1 1 0;
+        justify-content: center;
+    }
+
+    /* Kepala kolom hari */
+    #rapi-calendar .fc-col-header-cell { padding: 0.3rem 0; }
+
+    #rapi-calendar .fc-col-header-cell-cushion {
+        padding: 2px 0;
+        font-size: 0.62rem;
+        letter-spacing: 0.02em;
+    }
+
+    /* Sel tanggal: angka di tengah, tinggi minimum agar sel rapi dan mudah diketuk */
+    #rapi-calendar .fc-daygrid-day-frame { min-height: 3.6rem; }
+
+    #rapi-calendar .fc-daygrid-day-top {
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    #rapi-calendar .fc-daygrid-day-number {
+        padding: 0.25rem 0 0.1rem;
+        font-size: 0.78rem;
+    }
+
+    /* Agenda pada sel = deretan titik di bawah angka tanggal */
+    #rapi-calendar .fc-daygrid-day-events {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-content: flex-start;
+        gap: 3px;
+        margin: 0;
+        padding: 0 3px 4px;
+        min-height: 0;
+    }
+
+    #rapi-calendar .fc-daygrid-event-harness { margin: 0 !important; }
+
+    #rapi-calendar .fc-daygrid-dot-event {
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        background: none !important;
+        border: 0 !important;
+        border-radius: 0;
+        box-shadow: none;
+        transform: none !important;
+    }
+
+    #rapi-calendar .fc-daygrid-dot-event .fc-event-title,
+    #rapi-calendar .fc-daygrid-dot-event .fc-event-time { display: none; }
+
+    #rapi-calendar .fc-daygrid-event-dot { margin: 0; }
+
+    /* Tampilan Agenda (daftar) */
+    #rapi-calendar .fc-list-day-cushion { flex-wrap: wrap; }
+
+    #rapi-calendar .fc-list-event td {
+        padding: 0.55rem 0.45rem;
+        vertical-align: top;
+    }
+
+    #rapi-calendar .fc-list-event-time {
+        width: 1%;
+        white-space: nowrap;
+        font-size: 0.76rem;
+        color: var(--c-ink-muted);
+    }
+
+    #rapi-calendar .fc-list-event-title {
+        font-size: 0.85rem;
+        overflow-wrap: anywhere;
+    }
+
+    #rapi-calendar .fc-list-empty {
+        padding: 2rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* HP sangat kecil (<= 380px) */
+@media (max-width: 380px) {
+    #rapi-calendar .fc-col-header-cell-cushion { font-size: 0.56rem; }
+    #rapi-calendar .fc-daygrid-day-frame { min-height: 3.2rem; }
+    #rapi-calendar .fc-toolbar-title { font-size: 0.9rem; }
+    #rapi-calendar .fc-button,
+    #rapi-calendar .fc-button-primary { padding: 0.4rem 0.5rem; }
+}
+
+/* ------------- 17. HALAMAN DATA DI HP: TABEL JADI KARTU, FORM TIDAK MELUBER ------------- */
+/* Tabel data (agenda, pengaduan, role, user) diberi class "table-stack" dan setiap <td>
+   punya data-label di view. Di layar <= 900px tabel 7 kolom tidak muat, jadi tiap baris
+   ditampilkan sebagai satu kartu: label kolom di atas, isinya di bawah. */
+
+/* Bawaan browser: fieldset selebar isi terlebarnya, sehingga form memaksa halaman meluber. */
+fieldset { min-width: 0; max-width: 100%; }
+
+@media (max-width: 900px) {
+    main > div { min-width: 0; }
+
+    main div table.table-stack {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        max-width: 100% !important;
+        margin-top: var(--sp-3);
+        border: 0 !important;
+        border-radius: 0;
+        background: none;
+        box-shadow: none;
+        overflow: visible;
+    }
+
+    main div table.table-stack thead { display: none; }
+
+    main div table.table-stack tbody { display: block; }
+
+    /* Satu baris = satu kartu. Baris "melewati batas waktu" tetap berwarna merah muda
+       karena aturan miliknya memakai !important dan lebih spesifik. */
+    main div table.table-stack tbody tr {
+        display: block;
+        margin: 0 0 var(--sp-3);
+        padding: 0.2rem 0.9rem;
+        background: #ffffff !important;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--r-md);
+        box-shadow: var(--sh-1);
+    }
+
+    main div table.table-stack.table-stack tbody tr td {
+        display: block;
+        padding: 0.65rem 0 !important;
+        border: 0 !important;
+        border-bottom: 1px dashed rgba(22, 48, 42, 0.14) !important;
+        text-align: left;
+        overflow-wrap: anywhere;
+    }
+
+    main div table.table-stack.table-stack tbody tr td:last-child {
+        border-bottom: 0 !important;
+    }
+
+    main div table.table-stack tbody tr td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 0.2rem;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--c-primary-strong);
+    }
+
+    /* Baris "belum ada data": tanpa label, di tengah */
+    main div table.table-stack.table-stack tbody tr td[colspan] {
+        text-align: center;
+        padding: 1.2rem 0 !important;
+    }
+
+    main div table.table-stack tbody tr td[colspan]::before { content: none; }
+
+    /* Kolom aksi: tombol & isian dibesarkan agar mudah diketuk (menimpa style inline 11px) */
+    main div table.table-stack td.td-actions button,
+    main div table.table-stack td.td-actions summary {
+        min-height: 36px;
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.85rem !important;
+    }
+
+    main div table.table-stack td.td-actions summary {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    main div table.table-stack td.td-actions a[href*="wa-warning"] {
+        display: inline-block;
+        padding: 0.5rem 0.9rem !important;
+        font-size: 0.85rem !important;
+    }
+
+    main div table.table-stack td.td-actions input[type="text"],
+    main div table.table-stack td.td-actions input[type="date"],
+    main div table.table-stack td.td-actions input[type="time"],
+    main div table.table-stack td.td-actions input[type="file"],
+    main div table.table-stack td.td-actions select {
+        width: 100% !important;
+        max-width: 100%;
+        min-height: 36px;
+        font-size: 0.9rem !important;
+    }
+
+    main div table.table-stack td.td-actions details { display: block; }
+}
+
+/* Form pengajuan/pelaporan: 16px mencegah iOS memperbesar halaman saat kolom diketuk */
+@media (max-width: 640px) {
+    main fieldset input,
+    main fieldset select,
+    main fieldset textarea {
+        max-width: 100%;
+        font-size: 16px;
+    }
+
+    main fieldset input[type="time"] { width: 100%; }
+}

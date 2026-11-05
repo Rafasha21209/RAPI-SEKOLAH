@@ -1,0 +1,144 @@
+/* =========================================================================
+   RAPI-Sekolah - perapian tampilan (terutama HP)
+   Dimuat SETELAH style.css, jadi hanya menambah/menimpa seperlunya.
+   ========================================================================= */
+
+/* ---------- Lencana status (dipakai di semua ukuran layar) ---------- */
+.status-badge {
+    display: inline-block;
+    padding: 0.18rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.4;
+    border: 1px solid transparent;
+}
+.badge-ok      { background: var(--c-ok-bg);      color: var(--c-ok);      border-color: var(--c-ok-line); }
+.badge-warn    { background: var(--c-warn-bg);    color: var(--c-warn);    border-color: var(--c-warn-line); }
+.badge-danger  { background: var(--c-danger-bg);  color: var(--c-danger);  border-color: var(--c-danger-line); }
+.badge-info    { background: var(--c-accent-soft); color: var(--c-accent); border-color: rgba(74,122,155,.28); }
+.badge-neutral { background: var(--c-neutral-bg); color: var(--c-neutral); border-color: var(--c-neutral-line); }
+
+/* ---------- Input foto: kamera / galeri ---------- */
+.photo-input { position: relative; max-width: 360px; }
+.photo-input .pi-main {            /* tetap ada untuk validasi "required", tapi tidak terlihat */
+    position: absolute; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none;
+}
+.photo-input .pi-camera { display: none; }
+.photo-input .pi-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.photo-input .pi-btn {
+    flex: 1 1 140px;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+}
+.photo-input .pi-btn-camera {
+    background: var(--c-primary); color: #fff; border: 1px solid var(--c-primary-strong);
+}
+.photo-input .pi-btn-gallery {
+    background: #fff; color: var(--c-primary-strong); border: 1px solid var(--c-primary-line);
+}
+.photo-input .pi-preview { margin-top: 0.6rem; display: flex; align-items: center; gap: 0.6rem; }
+.photo-input .pi-preview[hidden] { display: none; }
+.photo-input .pi-preview img {
+    width: 72px; height: 72px; object-fit: cover; border-radius: var(--r-sm); border: 1px solid var(--line-strong);
+}
+.photo-input .pi-name { font-size: 0.78rem; color: var(--c-ink-soft); overflow-wrap: anywhere; }
+
+/* ---------- Navigasi bawah: tersembunyi di layar lebar ---------- */
+.bottom-nav { display: none; }
+
+@media (max-width: 992px) {
+    body:not(.page-login) { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
+
+    .bottom-nav {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 90;
+        display: flex; align-items: stretch; justify-content: space-around;
+        padding: 0.3rem 0.25rem calc(0.3rem + env(safe-area-inset-bottom, 0px));
+        background: #fff;
+        border-top: 1px solid var(--line-strong);
+        box-shadow: 0 -2px 10px rgba(22, 48, 42, 0.08);
+    }
+    .bottom-nav a, .bottom-nav button {
+        position: relative;
+        flex: 1 1 0; min-width: 0;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+        min-height: 52px; padding: 0.25rem 0;
+        background: transparent; border: 0; border-radius: var(--r-sm);
+        color: var(--c-ink-muted); font-size: 0.68rem; font-weight: 600; text-decoration: none;
+        box-shadow: none;
+    }
+    .bottom-nav svg {
+        width: 22px; height: 22px; fill: none; stroke: currentColor;
+        stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .bottom-nav .active { color: var(--c-primary-strong); background: var(--c-primary-soft); }
+    .bottom-nav .bn-badge {
+        position: absolute; top: 2px; left: calc(50% + 6px);
+        min-width: 17px; height: 17px; padding: 0 4px;
+        font-size: 0.65rem; font-style: normal; font-weight: 700; line-height: 17px; text-align: center;
+        color: #fff; background: #c0392b; border-radius: 999px;
+    }
+}
+
+/* ---------- Penyempurnaan khusus HP ---------- */
+@media (max-width: 640px) {
+    /* 16px mencegah iPhone memperbesar layar saat kolom diketuk; 44px = mudah ditekan jari */
+    main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+    main select,
+    main textarea {
+        font-size: 16px !important;
+        min-height: 44px;
+        padding: 0.5rem 0.7rem;
+        border-radius: var(--r-sm);
+    }
+    main textarea { min-height: 88px; }
+
+    main label { display: inline-block; margin-bottom: 0.25rem; font-weight: 600; font-size: 0.9rem; }
+
+    /* Tombol kirim di formulir: lebar penuh dan mudah ditekan */
+    main form button[type="submit"] {
+        min-height: 46px;
+        font-size: 0.95rem;
+    }
+    main fieldset form > button[type="submit"],
+    main form > p > button[type="submit"],
+    main form > button[type="submit"]:only-of-type {
+        width: 100%;
+    }
+
+    /* Form di dalam kartu tabel: tombol & isian ukuran nyaman */
+    main div table.table-stack td.td-actions button,
+    main div table.table-stack td.td-actions summary { min-height: 42px; font-size: 0.9rem !important; }
+    main div table.table-stack td.td-actions input,
+    main div table.table-stack td.td-actions select,
+    main div table.table-stack td.td-actions textarea { font-size: 16px !important; max-width: 100% !important; width: 100% !important; }
+
+    main div table.table-stack tbody tr { padding: 0.35rem 1rem; }
+
+    /* Judul halaman lebih ringkas, jarak antar blok lebih lega */
+    main h2 { margin-bottom: 0.6rem; }
+    main > div > p { line-height: 1.5; }
+
+    /* Pesan sukses / error ditampilkan sebagai kotak, bukan teks polos */
+    main div[style*="color: green"],
+    main div[style*="color:green"],
+    main p[style*="color: green"] {
+        padding: 0.65rem 0.85rem; border-radius: var(--r-sm);
+        background: var(--c-ok-bg); border: 1px solid var(--c-ok-line); color: var(--c-ok) !important;
+    }
+    main div[style*="color: red"],
+    main p[style*="color: red"] {
+        padding: 0.65rem 0.85rem; border-radius: var(--r-sm);
+        background: var(--c-danger-bg); border: 1px solid var(--c-danger-line); color: var(--c-danger) !important;
+    }
+    main div[style*="color: red"] ul { margin-left: 1.1rem; }
+
+    .photo-input { max-width: 100%; }
+}
+
+/* Cetak: navigasi bawah tidak ikut tercetak */
+@media print { .bottom-nav { display: none !important; } }
