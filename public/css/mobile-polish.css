@@ -142,3 +142,93 @@
 
 /* Cetak: navigasi bawah tidak ikut tercetak */
 @media print { .bottom-nav { display: none !important; } }
+
+
+/* ---------- Tombol navigasi admin (Agenda / Ruangan / Role / User / Laporan) ---------- */
+.admin-nav {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    margin: 0.25rem 0 1.1rem;
+}
+.admin-nav a {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 40px; padding: 0.45rem 1rem;
+    font-size: 0.86rem; font-weight: 600; text-decoration: none;
+    color: var(--c-primary-strong); background: #fff;
+    border: 1px solid var(--c-primary-line); border-radius: 999px;
+    transition: background .15s, color .15s;
+}
+.admin-nav a:hover { background: var(--c-primary-soft); }
+.admin-nav a.is-active { background: var(--c-primary-strong); color: #fff; border-color: var(--c-primary-strong); }
+
+/* ---------- Kotak pengantar halaman ---------- */
+.page-intro {
+    margin: 0.4rem 0 1.1rem; padding: 0.8rem 1rem;
+    background: var(--c-primary-soft); border: 1px solid var(--c-primary-line);
+    border-radius: var(--r-md, 10px);
+}
+.page-intro p { margin: 0 0 0.35rem; font-size: 0.9rem; line-height: 1.5; color: var(--c-ink-soft); }
+.page-intro p:last-child { margin-bottom: 0; }
+
+/* ---------- Halaman profil ---------- */
+.profile-card {
+    max-width: 520px; padding: 1.2rem;
+    background: #fff; border: 1px solid var(--line-strong); border-radius: var(--r-md, 10px);
+    box-shadow: var(--sh-1);
+}
+.profile-head { display: flex; align-items: center; gap: 0.9rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line-strong); }
+.profile-avatar {
+    flex: 0 0 auto; width: 56px; height: 56px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 700; color: #fff; background: var(--c-primary-strong);
+}
+.profile-name { display: block; font-size: 1.1rem; }
+.profile-role { display: inline-block; margin-top: 0.2rem; font-size: 0.8rem; color: var(--c-ink-muted); }
+.profile-list { margin: 0.9rem 0 0; }
+.profile-list > div { display: flex; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px dashed var(--line-strong); }
+.profile-list > div:last-child { border-bottom: 0; }
+.profile-list dt { flex: 0 0 96px; font-size: 0.82rem; font-weight: 600; color: var(--c-ink-muted); }
+.profile-list dd { margin: 0; font-size: 0.92rem; overflow-wrap: anywhere; }
+.profile-note { margin: 1rem 0 0; font-size: 0.8rem; line-height: 1.5; color: var(--c-ink-muted); }
+
+@media (max-width: 640px) {
+    .admin-nav a { flex: 1 1 calc(50% - 0.5rem); }
+    .profile-card { max-width: 100%; }
+}
+
+
+/* ---------- Halaman laporan: filter & tombol aksi ---------- */
+.report-filter {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.75rem;
+    margin-bottom: 0.9rem; padding: 0.9rem;
+    background: #fff; border: 1px solid var(--line-strong); border-radius: var(--r-md, 10px);
+}
+.report-filter .rf-field { flex: 1 1 180px; min-width: 0; }
+.report-filter label { display: block; margin-bottom: 0.25rem; font-size: 0.82rem; font-weight: 600; color: var(--c-ink-muted); }
+.report-filter select,
+.report-filter input[type="date"],
+.report-filter input[type="month"] {
+    width: 100%; min-height: 44px; padding: 0.45rem 0.7rem;
+    font: inherit; font-size: 0.95rem; color: var(--c-ink);
+    background: #fff; border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+}
+.report-filter .rf-submit { flex: 0 0 auto; min-height: 44px; padding: 0.5rem 1.4rem; }
+
+.report-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.2rem; }
+.report-actions .ra-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 44px; padding: 0.5rem 1.1rem;
+    font: inherit; font-size: 0.88rem; font-weight: 600; text-decoration: none; cursor: pointer;
+    border-radius: var(--r-sm); border: 1px solid var(--c-primary-line);
+    background: #fff; color: var(--c-primary-strong);
+    margin: 0;
+}
+.report-actions .ra-btn:hover { background: var(--c-primary-soft); }
+.report-actions .ra-print { background: var(--c-primary-strong); color: #fff; border-color: var(--c-primary-strong); }
+.report-actions .ra-print:hover { background: var(--c-primary); }
+.report-actions .ra-wa { color: #1f7a3d; border-color: #9bd2ae; }
+.report-actions .ra-wa:hover { background: #eaf7ee; }
+
+@media (max-width: 640px) {
+    .report-filter .rf-submit { flex: 1 1 100%; }
+    .report-actions .ra-btn { flex: 1 1 100%; }
+}

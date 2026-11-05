@@ -15,26 +15,30 @@
 <div style="padding: 20px;">
     <h2>Laporan {{ $mode === 'daily' ? 'Harian' : 'Bulanan' }}</h2>
 
-    <form method="GET" action="{{ route('reports.index') }}" class="no-print" style="margin-bottom: 12px;">
-        <label for="mode">Jenis laporan:</label>
-        <select id="mode" name="mode" onchange="document.getElementById('f-daily').style.display=this.value==='daily'?'inline':'none';document.getElementById('f-monthly').style.display=this.value==='daily'?'none':'inline';">
-            <option value="daily" {{ $mode === 'daily' ? 'selected' : '' }}>Harian</option>
-            <option value="monthly" {{ $mode === 'monthly' ? 'selected' : '' }}>Bulanan</option>
-        </select>
-        <span id="f-daily" style="display: {{ $mode === 'daily' ? 'inline' : 'none' }};">
-            <input type="date" name="date" value="{{ $date }}">
-        </span>
-        <span id="f-monthly" style="display: {{ $mode === 'daily' ? 'none' : 'inline' }};">
-            <input type="month" name="month" value="{{ $month }}">
-        </span>
-        <button type="submit">Tampilkan</button>
+    <form method="GET" action="{{ route('reports.index') }}" class="report-filter no-print">
+        <div class="rf-field">
+            <label for="mode">Jenis laporan</label>
+            <select id="mode" name="mode" onchange="document.getElementById('f-daily').style.display=this.value==='daily'?'block':'none';document.getElementById('f-monthly').style.display=this.value==='daily'?'none':'block';">
+                <option value="daily" {{ $mode === 'daily' ? 'selected' : '' }}>Harian</option>
+                <option value="monthly" {{ $mode === 'monthly' ? 'selected' : '' }}>Bulanan</option>
+            </select>
+        </div>
+        <div class="rf-field" id="f-daily" style="display: {{ $mode === 'daily' ? 'block' : 'none' }};">
+            <label for="date">Tanggal</label>
+            <input type="date" id="date" name="date" value="{{ $date }}">
+        </div>
+        <div class="rf-field" id="f-monthly" style="display: {{ $mode === 'daily' ? 'none' : 'block' }};">
+            <label for="month">Bulan</label>
+            <input type="month" id="month" name="month" value="{{ $month }}">
+        </div>
+        <button type="submit" class="rf-submit">Tampilkan</button>
     </form>
 
-    <p class="report-actions no-print" style="margin-bottom: 16px;">
-        <button type="button" onclick="window.print()">Cetak / Simpan PDF</button>
-        <a href="{{ route('reports.export', ['mode' => $mode, 'month' => $month, 'date' => $date]) }}">Unduh Excel (CSV)</a>
-        <a href="{{ $waUrl }}" target="_blank" rel="noopener">Kirim ringkasan via WhatsApp</a>
-    </p>
+    <div class="report-actions no-print">
+        <button type="button" class="ra-btn ra-print" onclick="window.print()">Cetak / Simpan PDF</button>
+        <a class="ra-btn ra-csv" href="{{ route('reports.export', ['mode' => $mode, 'month' => $month, 'date' => $date]) }}">Unduh Excel (CSV)</a>
+        <a class="ra-btn ra-wa" href="{{ $waUrl }}" target="_blank" rel="noopener">Kirim via WhatsApp</a>
+    </div>
 
     <h3>Periode: {{ $periodLabel }}</h3>
 

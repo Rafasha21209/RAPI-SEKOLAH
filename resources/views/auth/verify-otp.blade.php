@@ -59,10 +59,10 @@
          srcset="{{ asset('images/login-foto.jpg') }} 1x, {{ asset('images/login-foto-2x.jpg') }} 2x"
          alt="Gedung SMK Negeri 1 Bantul" width="372" height="170">
 
-    <h2>Masukkan Kode OTP</h2>
+    <h2>Verifikasi Kode OTP</h2>
     <p class="auth-lead">
-        Kode 6 angka sudah dikirim ke email akun <strong>{{ $username }}</strong> (berlaku 10 menit).
-        Lalu buat password baru.
+        Kode 6 angka sudah dikirim ke <strong>{{ $email }}</strong> (berlaku 10 menit).
+        Setelah kode benar, Anda bisa membuat password baru.
     </p>
 
     @if(session('success'))
@@ -77,34 +77,16 @@
         </div>
     @endif
 
-    <form action="{{ route('password.update') }}" method="POST" autocomplete="off">
+    <form action="{{ route('password.verify.submit') }}" method="POST" autocomplete="off">
         @csrf
 
         <div class="auth-field">
             <label for="otp">Kode OTP</label>
             <input type="text" id="otp" name="otp" class="auth-otp" required maxlength="6" minlength="6"
-                   inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" placeholder="000000">
+                   inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" placeholder="000000" autofocus>
         </div>
 
-        <div class="auth-field">
-            <label for="password">Password baru</label>
-            <div class="auth-pass">
-                <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password">
-                <button type="button" class="auth-toggle" data-target="password" aria-label="Tampilkan password">Lihat</button>
-            </div>
-            <span class="auth-hint">Minimal 8 karakter.</span>
-        </div>
-
-        <div class="auth-field">
-            <label for="password_confirmation">Ulangi password baru</label>
-            <div class="auth-pass">
-                <input type="password" id="password_confirmation" name="password_confirmation" required minlength="8" autocomplete="new-password">
-                <button type="button" class="auth-toggle" data-target="password_confirmation" aria-label="Tampilkan password">Lihat</button>
-            </div>
-            <span class="auth-match" id="matchMsg" aria-live="polite"></span>
-        </div>
-
-        <button type="submit" class="auth-submit">Ubah Password</button>
+        <button type="submit" class="auth-submit">Verifikasi Kode</button>
     </form>
 
     <form action="{{ route('password.resend') }}" method="POST">
@@ -115,29 +97,6 @@
     <a class="auth-back" href="{{ route('login') }}">&larr; Kembali ke login</a>
 </div>
 
-<script>
-    (function () {
-        document.querySelectorAll('.auth-toggle').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var input = document.getElementById(btn.dataset.target);
-                var show  = input.type === 'password';
-                input.type = show ? 'text' : 'password';
-                btn.textContent = show ? 'Sembunyi' : 'Lihat';
-            });
-        });
 
-        var p1 = document.getElementById('password');
-        var p2 = document.getElementById('password_confirmation');
-        var msg = document.getElementById('matchMsg');
-        function check() {
-            if (!p2.value) { msg.className = 'auth-match'; msg.textContent = ''; return; }
-            var ok = p1.value === p2.value;
-            msg.className = 'auth-match ' + (ok ? 'ok' : 'bad');
-            msg.textContent = ok ? 'Password cocok.' : 'Password belum sama.';
-        }
-        p1.addEventListener('input', check);
-        p2.addEventListener('input', check);
-    })();
-</script>
 
 @endsection

@@ -8,15 +8,21 @@
     $canApply = $me->can('create', \App\Models\Event::class);
     $todayWib = now('Asia/Jakarta')->toDateString();
     $minBorrow = now('Asia/Jakarta')->addDay()->toDateString(); // H-1: paling cepat besok
+    $minDate   = $isAdmin ? $todayWib : $minBorrow;             // Waka/Admin boleh hari ini (sesi yang belum lewat)
 @endphp
 
 <div style="padding: 20px;">
     <h2>Modul Agenda & Peminjaman Ruangan</h2>
-    <p style="font-size: 12px; color: #555;">
-        Login sebagai <strong>{{ $me->fullname ?? $me->username }}</strong> ({{ $roleName ?: '-' }}).
-        Agenda yang baru diajukan berstatus <strong>Pending</strong> dan wajib menunggu persetujuan Waka/Admin
-        sebelum tampil di <a href="{{ route('public.calendar') }}" target="_blank">kalender publik</a>.
-    </p>
+    <div class="page-intro">
+        <p>
+            Login sebagai <strong>{{ $me->fullname ?? $me->username }}</strong>
+            <span class="status-badge badge-info">{{ $roleName ?: '-' }}</span>
+        </p>
+        <p>
+            Agenda yang baru diajukan berstatus <strong>Pending</strong> dan menunggu persetujuan Waka/Admin
+            sebelum tampil di <a href="{{ route('public.calendar') }}" target="_blank">kalender publik</a>.
+        </p>
+    </div>
 
     @if(session('success'))
         <div style="color: green; margin-bottom: 10px;">{{ session('success') }}</div>
@@ -35,17 +41,14 @@
     @endif
 
     @if($isAdmin)
-        <p style="margin-bottom: 15px;">
-            <a href="{{ route('roles.index') }}">Kelola Role</a> &middot;
-            <a href="{{ route('users.index') }}">Kelola User & Assign Role</a>
-        </p>
+        @include('partials.admin-nav', ['active' => 'events'])
     @endif
 
     {{-- Form Pengajuan Agenda (Guru/Organisasi & Waka/Admin) --}}
     @if($canApply)
         <fieldset style="margin-bottom: 20px; padding: 15px;">
             <legend><strong>Form Pengajuan Agenda / Peminjaman Ruang</strong></legend>
-            <form action="{{ route('events.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('events.store') }}" method="POST" enctype="multipart/form-data" data-session-guard>
                 @csrf
                 <p>
                     <label>Nama Agenda / Kegiatan:</label><br>
@@ -62,25 +65,32 @@
                 </p>
                 <p>
                     <label>Tanggal:</label><br>
-                    <input type="date" name="date" value="{{ old('date') }}" min="{{ $minBorrow }}" required>
-                    <small style="display:block; color:#666;">Peminjaman diajukan minimal H-1 (paling cepat {{ \Carbon\Carbon::parse($minBorrow)->format('d/m/Y') }}).</small>
+                    <input type="date" name="date" value="{{ old('date') }}" min="{{ $minDate }}" required>
+                    <small style="display:block; color:#666;">
+                        @if($isAdmin)
+                            Waka/Admin boleh memilih hari ini untuk sesi yang belum dimulai.
+                        @else
+                            Peminjaman diajukan minimal H-1 (paling cepat {{ \Carbon\Carbon::parse($minBorrow)->format('d/m/Y') }}).
+                        @endif
+                    </small>
                 </p>
                 <p>
                     <label>Sesi Mulai:</label>
                     <select name="start_session" required>
                         <option value="">-- Pilih --</option>
                         @for($i = \App\Models\Event::SESSION_MIN; $i <= \App\Models\Event::SESSION_MAX; $i++)
-                            <option value="{{ $i }}" {{ old('start_session') == $i ? 'selected' : '' }}>Sesi {{ $i }}</option>
+                            <option value="{{ $i }}" {{ old('start_session') == $i ? 'selected' : '' }}>Sesi {{ $i }} ({{ \App\Models\Event::sessionTimeRange($i, $i) }})</option>
                         @endfor
                     </select>
                     <label>Sesi Selesai:</label>
                     <select name="end_session" required>
                         <option value="">-- Pilih --</option>
                         @for($i = \App\Models\Event::SESSION_MIN; $i <= \App\Models\Event::SESSION_MAX; $i++)
-                            <option value="{{ $i }}" {{ old('end_session') == $i ? 'selected' : '' }}>Sesi {{ $i }}</option>
+                            <option value="{{ $i }}" {{ old('end_session') == $i ? 'selected' : '' }}>Sesi {{ $i }} ({{ \App\Models\Event::sessionTimeRange($i, $i) }})</option>
                         @endfor
                     </select>
                     <small style="display:block; color:#666;">Pilih sesi yang sama jika hanya satu sesi.</small>
+                    <small class="sg-note" style="display:block; color:#666;"></small>
                 </p>
                 <p>
                     <label>Unggah Foto Izin:</label><br>
@@ -197,7 +207,7 @@
                         @if($bisaEdit)
                             <details style="margin-top: 5px;">
                                 <summary style="font-size: 11px; cursor: pointer;">Edit Agenda</summary>
-                                <form action="{{ route('events.update', $event->id) }}" method="POST" enctype="multipart/form-data" style="margin-top: 5px;">
+                                <form action="{{ route('events.update', $event->id) }}" method="POST" enctype="multipart/form-data" style="margin-top: 5px;" data-session-guard>
                                     @csrf
                                     @method('PUT')
                                     <input type="text" name="event_name" value="{{ $event->event_name }}" required style="font-size: 11px; width: 130px;"><br>
@@ -210,13 +220,13 @@
                                     <select name="start_session" required style="font-size: 11px; margin-top: 3px;">
                                         <option value="">Sesi mulai</option>
                                         @for($i = \App\Models\Event::SESSION_MIN; $i <= \App\Models\Event::SESSION_MAX; $i++)
-                                            <option value="{{ $i }}" {{ $event->start_session === $i ? 'selected' : '' }}>Sesi {{ $i }}</option>
+                                            <option value="{{ $i }}" {{ $event->start_session === $i ? 'selected' : '' }}>Sesi {{ $i }} ({{ \App\Models\Event::sessionTimeRange($i, $i, $event->date->format('Y-m-d')) }})</option>
                                         @endfor
                                     </select>
                                     <select name="end_session" required style="font-size: 11px;">
                                         <option value="">Sesi selesai</option>
                                         @for($i = \App\Models\Event::SESSION_MIN; $i <= \App\Models\Event::SESSION_MAX; $i++)
-                                            <option value="{{ $i }}" {{ $event->end_session === $i ? 'selected' : '' }}>Sesi {{ $i }}</option>
+                                            <option value="{{ $i }}" {{ $event->end_session === $i ? 'selected' : '' }}>Sesi {{ $i }} ({{ \App\Models\Event::sessionTimeRange($i, $i, $event->date->format('Y-m-d')) }})</option>
                                         @endfor
                                     </select><br>
                                     <input type="file" name="photo" accept="image/jpeg,image/png,image/jpg" style="font-size: 11px; margin-top: 3px;"><br>
@@ -238,4 +248,5 @@
         </tbody>
     </table>
 </div>
+@include('partials.session-guard')
 @endsection

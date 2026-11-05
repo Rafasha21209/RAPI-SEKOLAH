@@ -13,6 +13,10 @@
     <title>RAPI-Sekolah</title>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/mobile-polish.css') }}">
+    {{-- Agar bisa di-install di HP (Add to Home Screen) --}}
+    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+    <meta name="theme-color" content="#3f7a68">
+    <link rel="apple-touch-icon" href="{{ asset('images/icon-192.png') }}">
 </head>
 <body class="@yield('body_class')">
     <div class="app-shell">
@@ -68,6 +72,13 @@
                                 <span>Notifikasi @if($unreadNotif > 0)<strong style="color:#e74c3c;">({{ $unreadNotif }})</strong>@endif</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="{{ route('profile.show') }}"
+                               class="sidebar-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                <span>Profil Saya</span>
+                            </a>
+                        </li>
                     @endauth
                 </ul>
 
@@ -110,13 +121,13 @@
 
             <div class="sidebar-footer">
                 @auth
-                    <div class="sidebar-user">
+                    <a href="{{ route('profile.show') }}" class="sidebar-user" style="text-decoration:none; color:inherit;" title="Lihat profil">
                         <span class="sidebar-avatar" aria-hidden="true">{{ $initial }}</span>
                         <span class="sidebar-user-text">
                             <strong>{{ $displayName }}</strong>
                             <small>{{ $roleName ?: '-' }}</small>
                         </span>
-                    </div>
+                    </a>
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit" class="sidebar-logout">
@@ -180,6 +191,12 @@
             </button>
         </nav>
     @endauth
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+        }
+    </script>
 
     <script>
         (function () {

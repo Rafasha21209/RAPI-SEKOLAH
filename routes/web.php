@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RoomController;
@@ -41,7 +42,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/forgot-password/resend', [AuthController::class, 'resendOtp'])
         ->middleware('throttle:3,1')
         ->name('password.resend');
-    Route::post('/forgot-password/verify', [AuthController::class, 'resetPassword'])
+    Route::post('/forgot-password/verify', [AuthController::class, 'verifyOtp'])
+        ->middleware('throttle:10,1')
+        ->name('password.verify.submit');
+    Route::get('/forgot-password/reset', [AuthController::class, 'showResetForm'])->name('password.reset.form');
+    Route::post('/forgot-password/reset', [AuthController::class, 'resetPassword'])
         ->middleware('throttle:10,1')
         ->name('password.update');
 });
@@ -57,6 +62,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    // Profil user yang login (nama, email, nomor HP)
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
 
     // Notifikasi milik user yang login
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

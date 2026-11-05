@@ -3,10 +3,7 @@
 @section('content')
 <div style="padding: 20px;">
     <h2>Kelola User & Assign Role</h2>
-    <p style="font-size: 12px; color: #555;">
-        <a href="{{ route('events.index') }}">&larr; Kembali</a> &middot;
-        <a href="{{ route('roles.index') }}">Kelola Role</a>
-    </p>
+    @include('partials.admin-nav', ['active' => 'users'])
 
     @if(session('success'))
         <div style="color: green; margin-bottom: 10px;">{{ session('success') }}</div>

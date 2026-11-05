@@ -55,7 +55,7 @@
 
     <h2>Lupa Password</h2>
     <p class="auth-lead">
-        Masukkan username Anda. Kode OTP 6 angka akan dikirim ke email yang terdaftar di akun.
+        Masukkan email yang terdaftar di akun Anda. Kode OTP 6 angka akan dikirim ke email tersebut.
     </p>
 
     @if($errors->any())
@@ -70,9 +70,9 @@
         @csrf
 
         <div class="auth-field">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" value="{{ old('username') }}"
-                   required autocomplete="username" autocapitalize="none" spellcheck="false">
+            <label for="email">Email terdaftar</label>
+            <input type="email" id="email" name="email" value="{{ old('email') }}"
+                   placeholder="nama@gmail.com" required autocomplete="email" autocapitalize="none" spellcheck="false">
         </div>
 
         <button type="submit" class="auth-submit">Kirim Kode OTP</button>

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 /**
  * KHUSUS UJI COBA.
  * - Semua user memakai satu nomor HP.
- * - Email tiap user BERBEDA tetapi masuk ke SATU inbox, memakai "plus addressing" Gmail:
+ * - Admin: rafdan543@gmail.com. Email user lain BERBEDA tetapi masuk ke SATU inbox, memakai "plus addressing" Gmail:
  *     rafdan543+<username>@gmail.com  ->  tetap diterima di rafdan543@gmail.com
  *   Jadi tiap akun/role punya email unik (syarat lupa password), tanpa perlu banyak akun Gmail.
  *
@@ -37,9 +37,14 @@ class TestContactSeeder extends Seeder
         foreach (User::with('role')->get() as $user) {
             $slug = preg_replace('/[^a-z0-9._-]/', '', mb_strtolower($user->username));
 
+            // Admin memakai email utama; role/akun lain memakai alamat "+" yang tetap masuk ke inbox yang sama.
+            $email = $user->username === 'admin'
+                ? 'rafdan543@gmail.com'
+                : 'rafdan543+' . $slug . '@gmail.com';
+
             $user->update([
                 'phone_number' => '083130018103',
-                'email'        => 'rafdan543+' . $slug . '@gmail.com',
+                'email'        => $email,
             ]);
         }
     }

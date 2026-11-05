@@ -36,6 +36,35 @@ class Event extends Model
     public const SESSION_MIN = 1;
     public const SESSION_MAX = 10;
 
+    /**
+     * JADWAL JAM PELAJARAN (WIB) - sesuai jadwal sekolah.
+     * Format: nomor sesi => [mulai, selesai]. Istirahat = jeda antar sesi (09:15-09:30, 11:30-12:30).
+     * UBAH DI SINI bila jadwal sekolah berubah.
+     */
+    public const SCHEDULE_REGULAR = [   // Senin - Kamis (10 sesi, pulang 15:10)
+        1  => ['07:15', '07:55'],
+        2  => ['07:55', '08:35'],
+        3  => ['08:35', '09:15'],
+        4  => ['09:30', '10:10'],
+        5  => ['10:10', '10:50'],
+        6  => ['10:50', '11:30'],
+        7  => ['12:30', '13:10'],
+        8  => ['13:10', '13:50'],
+        9  => ['13:50', '14:30'],
+        10 => ['14:30', '15:10'],
+    ];
+
+    public const SCHEDULE_FRIDAY = [    // Jumat (8 sesi, pulang 13:50)
+        1 => ['07:15', '07:55'],
+        2 => ['07:55', '08:35'],
+        3 => ['08:35', '09:15'],
+        4 => ['09:30', '10:10'],
+        5 => ['10:10', '10:50'],
+        6 => ['10:50', '11:25'],
+        7 => ['12:40', '13:15'],
+        8 => ['13:15', '13:50'],
+    ];
+
     protected $fillable = [
         'room_id',
         'user_id',
@@ -114,13 +143,76 @@ class Event extends Model
             ->where('end_session', '>=', $startSession);
     }
 
-    /** Label waktu pinjam: "Sesi 3" / "Sesi 1-4"; data lama tetap tampil jamnya. */
+    /** Jadwal sesi untuk tanggal tertentu (Y-m-d). Jumat memakai jadwal Jumat; hari lain jadwal reguler. */
+    public static function scheduleFor(?string $date = null): array
+    {
+        $isFriday = $date && \Carbon\Carbon::parse($date)->dayOfWeekIso === 5;
+
+        return $isFriday ? self::SCHEDULE_FRIDAY : self::SCHEDULE_REGULAR;
+    }
+
+    /** Nomor sesi terakhir pada tanggal tsb (Jumat = 8, lainnya = 10). */
+    public static function maxSessionFor(?string $date = null): int
+    {
+        return max(array_keys(self::scheduleFor($date)));
+    }
+
+    private static function toMinutes(string $hhmm): int
+    {
+        [$h, $m] = array_map('intval', explode(':', $hhmm));
+
+        return $h * 60 + $m;
+    }
+
+    /** Menit sejak 00:00 saat sesi $n dimulai pada tanggal $date; null bila sesi itu tidak ada hari tsb. */
+    public static function sessionStartMinutes(int $n, ?string $date = null): ?int
+    {
+        $s = self::scheduleFor($date);
+
+        return isset($s[$n]) ? self::toMinutes($s[$n][0]) : null;
+    }
+
+    /** Jam sesi, mis. sesi 1-3 => "07:15-09:15". */
+    public static function sessionTimeRange(int $startSession, int $endSession, ?string $date = null): string
+    {
+        $s = self::scheduleFor($date);
+        if (!isset($s[$startSession], $s[$endSession])) {
+            return '-';
+        }
+
+        return $s[$startSession][0] . '-' . $s[$endSession][1];
+    }
+
+    /**
+     * Apakah sesi $session pada tanggal $date (Y-m-d) sudah dimulai/lewat menurut jam WIB sekarang?
+     * Tanggal besok atau setelahnya selalu false; tanggal kemarin atau sebelumnya selalu true.
+     */
+    public static function isSessionPast(string $date, int $session): bool
+    {
+        $now   = \Carbon\Carbon::now('Asia/Jakarta');
+        $today = $now->toDateString();
+
+        if ($date < $today) {
+            return true;
+        }
+        if ($date > $today) {
+            return false;
+        }
+
+        $start = self::sessionStartMinutes($session, $date);
+
+        return $start !== null && $start <= ($now->hour * 60 + $now->minute);
+    }
+
+    /** Label waktu pinjam: "Sesi 3 · 08:30-09:15"; data lama tetap tampil jamnya. */
     public function sessionLabel(): string
     {
         if ($this->start_session) {
-            return $this->start_session === $this->end_session
+            $label = $this->start_session === $this->end_session
                 ? 'Sesi ' . $this->start_session
                 : 'Sesi ' . $this->start_session . '-' . $this->end_session;
+
+            return $label . ' · ' . self::sessionTimeRange($this->start_session, $this->end_session, $this->date?->format('Y-m-d'));
         }
 
         if ($this->start_time) {

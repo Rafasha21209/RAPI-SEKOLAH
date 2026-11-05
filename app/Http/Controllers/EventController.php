@@ -34,6 +34,38 @@ class EventController extends Controller
     }
 
     /**
+     * Tanggal paling awal yang boleh dipilih: Waka/Admin mulai hari ini,
+     * Guru/Organisasi mulai besok (H-1).
+     */
+    private function minDateFor($user): string
+    {
+        return $user && $user->isAdmin() ? $this->todayWib() : $this->minBorrowDate();
+    }
+
+    /** Pesan error bila sesi melebihi jadwal hari tsb (Jumat hanya sampai sesi 8). */
+    private function overSessionMessage(string $date, int $startSession, int $endSession): ?string
+    {
+        $max = Event::maxSessionFor($date);
+
+        if ($startSession > $max || $endSession > $max) {
+            return 'Pada tanggal tersebut jam pelajaran hanya sampai sesi ' . $max . '. Pilih sesi 1-' . $max . '.';
+        }
+
+        return null;
+    }
+
+    /** Pesan error bila sesi pada tanggal tsb sudah lewat jamnya; null bila masih boleh. */
+    private function pastSessionMessage(string $date, int $session): ?string
+    {
+        if (!Event::isSessionPast($date, $session)) {
+            return null;
+        }
+
+        return 'Sesi ' . $session . ' (' . Event::sessionTimeRange($session, $session, $date) . ' WIB) sudah lewat. '
+            . 'Pilih sesi yang belum dimulai, atau pilih tanggal besok.';
+    }
+
+    /**
      * Tanggal paling awal yang boleh dipinjam = besok (H-1): pengajuan harus
      * dilakukan minimal satu hari sebelum tanggal pemakaian.
      */
@@ -112,12 +144,14 @@ class EventController extends Controller
         $validated = $request->validate([
             'room_id'    => ['required', 'integer', Rule::exists('rooms', 'id')->where('is_active', true)],
             'event_name' => ['required', 'string', 'max:255'],
-            'date'       => ['required', 'date', 'after_or_equal:' . $this->minBorrowDate()],
+            'date'       => ['required', 'date', 'after_or_equal:' . $this->minDateFor(Auth::user())],
             'start_session' => ['required', 'integer', 'between:' . Event::SESSION_MIN . ',' . Event::SESSION_MAX],
             'end_session'   => ['required', 'integer', 'between:' . Event::SESSION_MIN . ',' . Event::SESSION_MAX, 'gte:start_session'],
             'photo'      => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
         ], [
-            'date.after_or_equal' => 'Peminjaman harus diajukan minimal H-1 (paling cepat untuk tanggal ' . Carbon::tomorrow('Asia/Jakarta')->format('d/m/Y') . ').',
+            'date.after_or_equal' => Auth::user()->isAdmin()
+                ? 'Tanggal peminjaman tidak boleh sebelum hari ini.'
+                : 'Peminjaman harus diajukan minimal H-1 (paling cepat untuk tanggal ' . Carbon::tomorrow('Asia/Jakarta')->format('d/m/Y') . ').',
             'start_session.required' => 'Sesi mulai wajib dipilih.',
             'end_session.required'   => 'Sesi selesai wajib dipilih.',
             'start_session.between'  => 'Sesi mulai harus antara 1 sampai 10.',
@@ -125,6 +159,15 @@ class EventController extends Controller
             'end_session.gte'        => 'Sesi selesai tidak boleh lebih kecil dari sesi mulai.',
             'photo.required' => 'Foto izin peminjaman wajib diunggah.',
         ]);
+
+        if ($pesan = $this->overSessionMessage($validated['date'], (int) $validated['start_session'], (int) $validated['end_session'])) {
+            return back()->withErrors(['end_session' => $pesan])->withInput();
+        }
+
+        // Sesi yang jamnya sudah lewat (menurut jam WIB sekarang) tidak boleh dipilih untuk hari ini.
+        if ($pesan = $this->pastSessionMessage($validated['date'], (int) $validated['start_session'])) {
+            return back()->withErrors(['start_session' => $pesan])->withInput();
+        }
 
         // KETENTUAN: validasi bentrok jadwal mempertimbangkan agenda
         // APPROVED maupun PENDING (lihat Event::scopeConflicting).
@@ -300,6 +343,17 @@ class EventController extends Controller
             'date.after_or_equal' => 'Tanggal baru tidak boleh sebelum hari ini.',
             'end_session.gte'     => 'Sesi selesai tidak boleh lebih kecil dari sesi mulai.',
         ]);
+
+        if ($pesan = $this->overSessionMessage($validated['date'], (int) $validated['start_session'], (int) $validated['end_session'])) {
+            return back()->withErrors(['end_session' => $pesan])->withInput();
+        }
+
+        // Cek sesi lewat hanya jika tanggal/sesi mulai diubah (edit data lama tetap boleh).
+        $berubah = $validated['date'] !== $event->date->format('Y-m-d')
+            || (int) $validated['start_session'] !== (int) $event->start_session;
+        if ($berubah && ($pesan = $this->pastSessionMessage($validated['date'], (int) $validated['start_session']))) {
+            return back()->withErrors(['start_session' => $pesan])->withInput();
+        }
 
         $bentrok = Event::conflicting(
             $validated['room_id'],

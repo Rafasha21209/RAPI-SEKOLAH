@@ -3,10 +3,7 @@
 @section('content')
 <div style="padding: 20px;">
     <h2>Kelola Ruangan</h2>
-    <p style="font-size: 12px; color: #555;">
-        <a href="{{ route('events.index') }}">&larr; Kembali</a> &middot;
-        <a href="{{ route('users.index') }}">Kelola User</a>
-    </p>
+    @include('partials.admin-nav', ['active' => 'rooms'])
 
     @if(session('success'))
         <div style="color: green; margin-bottom: 10px;">{{ session('success') }}</div>
