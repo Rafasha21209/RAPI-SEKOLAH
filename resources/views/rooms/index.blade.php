@@ -77,7 +77,12 @@
                     <td data-label="Jenis">{{ $room->room_type ?: '-' }}</td>
                     <td data-label="Kapasitas">{{ $room->capacity }}</td>
                     <td data-label="Lokasi">{{ $room->location }}</td>
-                    <td data-label="PIC">{{ $room->pic->fullname ?? ($room->pic->username ?? '') }}@unless($room->pic)<small>PIC semua ruangan</small>@endunless</td>
+                    <td data-label="PIC">
+                        {{ $room->pic->fullname ?? ($room->pic->username ?? '') }}@unless($room->pic)<small>PIC semua ruangan</small>@endunless
+                        @if($room->picNote())
+                            <br><small class="pic-note">Keterangan: {{ $room->picNote() }}</small>
+                        @endif
+                    </td>
                     <td data-label="Status">{{ $room->is_active ? 'Aktif' : 'Nonaktif' }}</td>
                     <td data-label="Aksi" class="td-actions">
                         <details>

@@ -65,6 +65,8 @@ Route::middleware('auth')->group(function () {
 
     // Profil user yang login (nama, email, nomor HP)
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     // Notifikasi milik user yang login
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -72,14 +74,17 @@ Route::middleware('auth')->group(function () {
 
     // Halaman list bersama (Read-only / index) - semua role yang login bisa lihat
     Route::get('/events', [EventController::class, 'index'])->name('events.index');
+    // Info ruangan kosong pada tanggal + sesi/jam tertentu (untuk form pengajuan).
+    Route::get('/events/availability', [EventController::class, 'availability'])->name('events.availability');
     Route::get('/complaints', [ComplaintController::class, 'index'])->name('complaints.index');
 
     // ==========================================
     // AGENDA / PEMINJAMAN RUANGAN
     // ==========================================
-    // Guru/Organisasi & Waka/Admin: boleh mengajukan peminjaman ruangan
+    // Guru/Organisasi, Siswa & Waka/Admin: boleh mengajukan peminjaman ruangan
     // (status awal dipaksa "pending" di controller, wajib approval).
-    Route::middleware('role:Guru/Organisasi,Waka/Admin')->group(function () {
+    // Peminjaman di luar jam sekolah dibatasi untuk Guru di EventController::store.
+    Route::middleware('role:Guru/Organisasi,Siswa,Waka/Admin')->group(function () {
         Route::post('/events', [EventController::class, 'store'])->name('events.store');
     });
 
@@ -131,5 +136,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/{user}/pic-scope', [UserController::class, 'updatePicScope'])->name('users.update-pic-scope');
         Route::put('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.update-role');
+        Route::put('/users/{user}/pic-note', [UserController::class, 'updatePicNote'])->name('users.update-pic-note');
     });
 });

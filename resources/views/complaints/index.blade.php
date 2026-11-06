@@ -91,13 +91,14 @@
     <table class="table-stack" border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
         <thead>
             <tr>
+                <th>No</th>
                 <th>Waktu Lapor</th>
                 <th>Ruangan</th>
                 <th>Pelapor</th>
                 <th>Kerusakan</th>
                 <th>Foto Bukti</th>
-                <th>Status Perbaikan</th>
-                <th>Kelola Aksi</th>
+                <th>Status</th>
+                <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -111,6 +112,7 @@
                     $waktuLapor   = $complaint->reported_at ?? $complaint->created_at;
                 @endphp
                 <tr @if($overdue) style="background: #fff4f4;" @endif>
+                    <td data-label="No">{{ $complaints->firstItem() + $loop->index }}</td>
                     <td data-label="Waktu Lapor">
                         {{ $waktuLapor ? $waktuLapor->format('d/m/Y H:i') : '-' }}
                         @if($overdue)
@@ -121,6 +123,10 @@
                         {{ $complaint->room->room_name ?? '-' }}
                         @if($complaint->pic ?? $complaint->room?->responsiblePic())
                             <br><small>PIC Ruang: {{ $complaint->pic->fullname ?? $complaint->room->responsiblePic()->fullname }}</small>
+                            @php $picNote = trim((string) (($complaint->pic ?? $complaint->room?->responsiblePic())?->pic_note ?? '')); @endphp
+                            @if($picNote !== '')
+                                <br><small class="pic-note">Keterangan PIC: {{ $picNote }}</small>
+                            @endif
                         @else
                             <br><small style="color:#c0392b;">PIC belum ditentukan</small>
                         @endif
@@ -133,14 +139,24 @@
                         @endif
                     </td>
                     <td data-label="Foto Bukti">
-                        @if($complaint->photo_path)
-                            <a href="{{ asset('storage/' . $complaint->photo_path) }}" target="_blank">Foto kerusakan</a>
-                        @else
-                            Tidak ada foto
-                        @endif
-                        @if($complaint->repair_photo_path)
-                            <br><a href="{{ asset('storage/' . $complaint->repair_photo_path) }}" target="_blank" style="color:#27ae60;">Foto setelah diperbaiki</a>
-                        @endif
+                        {{-- Foto dibuka di lightbox (dalam aplikasi), tidak membuka tab baru --}}
+                        <div class="thumb-row">
+                            @if($complaint->photo_path)
+                                <a href="{{ asset('storage/' . $complaint->photo_path) }}" class="thumb" data-lightbox="complaint-{{ $complaint->id }}" data-caption="Foto kerusakan">
+                                    <img src="{{ asset('storage/' . $complaint->photo_path) }}" alt="Foto kerusakan" loading="lazy">
+                                    <small>Foto kerusakan</small>
+                                </a>
+                            @endif
+                            @if($complaint->repair_photo_path)
+                                <a href="{{ asset('storage/' . $complaint->repair_photo_path) }}" class="thumb" data-lightbox="complaint-{{ $complaint->id }}" data-caption="Foto setelah diperbaiki">
+                                    <img src="{{ asset('storage/' . $complaint->repair_photo_path) }}" alt="Foto setelah diperbaiki" loading="lazy">
+                                    <small>Setelah diperbaiki</small>
+                                </a>
+                            @endif
+                            @if(!$complaint->photo_path && !$complaint->repair_photo_path)
+                                Tidak ada foto
+                            @endif
+                        </div>
                     </td>
                     <td data-label="Status">
                         <strong data-status="{{ $complaint->status_repair }}">{{ $complaint->status_repair }}</strong>
@@ -222,11 +238,13 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" style="text-align: center;">Belum ada data pengaduan kerusakan.</td>
+                    <td colspan="8" style="text-align: center;">Belum ada data pengaduan kerusakan.</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
+
+    {{ $complaints->links() }}
 </div>
 <script>
     document.querySelectorAll('select[name="status_repair"]').forEach(function (el) {

@@ -65,10 +65,31 @@ class Event extends Model
         8 => ['13:15', '13:50'],
     ];
 
+    /** Kategori yang bisa dipilih pada form pengajuan. */
+    public const CATEGORIES = ['Acara Sekolah', 'Kegiatan Guru', 'Kegiatan Siswa', 'Hari Libur'];
+
+    /**
+     * Jenis event pada kalender: warna + ikon + label (satu sumber untuk kalender, legenda, tabel).
+     * Pengajuan tanpa kategori (data lama / peminjaman biasa) = 'peminjaman'.
+     */
+    public const TYPE_META = [
+        'acara_sekolah'  => ['label' => 'Acara Sekolah',        'color' => '#2e7d32'],
+        'kegiatan_guru'  => ['label' => 'Kegiatan Guru',        'color' => '#1565c0'],
+        'kegiatan_siswa' => ['label' => 'Kegiatan Siswa',       'color' => '#e08a00'],
+        'hari_libur'     => ['label' => 'Hari Libur Sekolah',   'color' => '#ad1457'],
+        'libur_nasional' => ['label' => 'Hari Libur Nasional',  'color' => '#c62828'],
+        'peminjaman'     => ['label' => 'Peminjaman Ruangan',   'color' => '#546e7a'],
+    ];
+
     protected $fillable = [
         'room_id',
         'user_id',
         'event_name',
+        'category',
+        'description',
+        'notes',
+        'responsible_name',
+        'is_outside_hours',
         'date',
         'start_time',
         'end_time',
@@ -83,6 +104,7 @@ class Event extends Model
 
     protected $casts = [
         'date'          => 'date',
+        'is_outside_hours' => 'boolean',
         'start_session' => 'integer',
         'end_session'   => 'integer',
     ];
@@ -216,7 +238,9 @@ class Event extends Model
         }
 
         if ($this->start_time) {
-            return substr($this->start_time, 0, 5) . ' - ' . substr((string) $this->end_time, 0, 5);
+            $range = substr($this->start_time, 0, 5) . ' - ' . substr((string) $this->end_time, 0, 5);
+
+            return $this->is_outside_hours ? 'Luar jam sekolah, ' . $range : $range;
         }
 
         return '-';
@@ -247,5 +271,143 @@ class Event extends Model
     public function isApproved(): bool
     {
         return $this->normalizedStatus() === strtolower(self::STATUS_APPROVED);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Jenis event (untuk warna/ikon) & waktu bebas (di luar jam sekolah)
+    |--------------------------------------------------------------------------
+    */
+    public function typeKey(): string
+    {
+        return match ($this->category) {
+            'Acara Sekolah'  => 'acara_sekolah',
+            'Kegiatan Guru'  => 'kegiatan_guru',
+            'Kegiatan Siswa' => 'kegiatan_siswa',
+            'Hari Libur'     => 'hari_libur',
+            default          => 'peminjaman',
+        };
+    }
+
+    public function typeMeta(): array
+    {
+        return self::TYPE_META[$this->typeKey()];
+    }
+
+    /** Menit sejak 00:00 dari 'HH:MM' / 'HH:MM:SS'. */
+    public static function hhmmToMinutes(string $hhmm): int
+    {
+        return self::toMinutes(substr($hhmm, 0, 5));
+    }
+
+    /** Rentang jam sekolah satu hari [menit mulai sesi 1, menit selesai sesi terakhir]. */
+    public static function schoolSpanMinutes(string $date): array
+    {
+        $s = self::scheduleFor($date);
+
+        return [self::toMinutes($s[min(array_keys($s))][0]), self::toMinutes($s[max(array_keys($s))][1])];
+    }
+
+    /** Rentang waktu [mulai, selesai] dalam menit untuk sesi mulai..selesai pada tanggal tsb. */
+    public static function sessionRangeMinutes(int $startSession, int $endSession, string $date): ?array
+    {
+        $s = self::scheduleFor($date);
+        if (!isset($s[$startSession], $s[$endSession])) {
+            return null;
+        }
+
+        return [self::toMinutes($s[$startSession][0]), self::toMinutes($s[$endSession][1])];
+    }
+
+    /** Rentang waktu agenda ini dalam menit (sesi atau jam bebas); null bila tidak diketahui. */
+    public function rangeMinutes(): ?array
+    {
+        $date = $this->date?->format('Y-m-d');
+
+        if ($this->start_session && $date) {
+            return self::sessionRangeMinutes((int) $this->start_session, (int) $this->end_session, $date);
+        }
+
+        if ($this->start_time && $this->end_time) {
+            return [self::hhmmToMinutes($this->start_time), self::hhmmToMinutes($this->end_time)];
+        }
+
+        return null;
+    }
+
+    /**
+     * Agenda (selain yang ditolak) yang beririsan waktu dengan [$startMin, $endMin) pada ruangan & tanggal tsb.
+     * Mencakup agenda berbasis sesi MAUPUN berbasis jam bebas (di luar jam sekolah).
+     */
+    public static function overlappingByTime(int $roomId, string $date, int $startMin, int $endMin, ?int $excludeId = null)
+    {
+        return self::where('room_id', $roomId)
+            ->where('date', $date)
+            ->where('status', '!=', self::STATUS_REJECTED)
+            ->when($excludeId, fn (Builder $q) => $q->where('id', '!=', $excludeId))
+            ->get()
+            ->filter(function (Event $e) use ($startMin, $endMin) {
+                $r = $e->rangeMinutes();
+
+                return $r !== null && $r[0] < $endMin && $r[1] > $startMin;
+            })
+            ->values();
+    }
+
+    /** 'HH:MM' dari menit. */
+    public static function minutesToHhmm(int $m): string
+    {
+        return sprintf('%02d:%02d', intdiv($m, 60), $m % 60);
+    }
+
+    /** Teks status yang ramah tampilan: Approved | Rejected | Pending. */
+    public function statusText(): string
+    {
+        if ($this->isApproved()) {
+            return 'Approved';
+        }
+
+        return $this->normalizedStatus() === 'rejected' ? 'Rejected' : 'Pending';
+    }
+
+    /** URL foto/dokumen izin, atau null. */
+    public function photoUrl(): ?string
+    {
+        return $this->photo_path ? asset('storage/' . $this->photo_path) : null;
+    }
+
+    /**
+     * Data untuk modal detail (partials/detail-modal): dipakai halaman Agenda, Laporan, dll.
+     * Semua nilai berupa teks biasa; modal menyisipkannya lewat textContent (aman XSS).
+     */
+    public function detailPayload(): array
+    {
+        $meta   = $this->typeMeta();
+        $pic    = $this->room?->responsiblePic();
+        $status = $this->statusText();
+        $photo  = $this->photoUrl();
+
+        return [
+            'title'  => $this->event_name,
+            'badges' => array_values(array_filter([
+                ['text' => $this->category ?: $meta['label'], 'color' => $meta['color']],
+                $this->is_outside_hours ? ['text' => 'Di luar jam sekolah', 'color' => '#6d4c41'] : null,
+                ['text' => $status, 'color' => $status === 'Approved' ? '#2e7d32' : ($status === 'Rejected' ? '#c62828' : '#b8860b')],
+            ])),
+            'rows' => [
+                ['Ruangan', ($this->room->room_name ?? '-') . ($this->room?->location ? ' (' . $this->room->location . ')' : '')],
+                ['Tanggal', $this->date->copy()->locale('id')->translatedFormat('l, d F Y')],
+                ['Waktu', $this->sessionLabel()],
+                ['Pengaju', $this->user->fullname ?? $this->user->username ?? '-'],
+                ['Penanggung jawab', $this->responsible_name],
+                ['Tujuan penggunaan', $this->description],
+                ['Keterangan', $this->notes],
+                ['PIC ruangan', $pic ? ($pic->fullname ?: $pic->username) : null],
+                ['Keterangan PIC', $pic?->pic_note],
+                ['Alasan ditolak', $this->reject_reason],
+                ['Dipindahkan', $this->move_reason],
+            ],
+            'photos' => $photo ? [['src' => $photo, 'caption' => 'Foto / dokumen izin']] : [],
+        ];
     }
 }

@@ -15,6 +15,8 @@ class User extends Authenticatable
         'fullname',
         'phone_number',
         'email',
+        'avatar',
+        'pic_note',
         'role_id',
         'is_all_rooms_pic',
     ];
@@ -86,5 +88,22 @@ class User extends Authenticatable
     public function isReporter(): bool
     {
         return $this->hasRole('Guru/Organisasi');
+    }
+
+    public function isSiswa(): bool
+    {
+        return $this->hasRole('Siswa');
+    }
+
+    /** Guru/Organisasi (bukan Waka/Admin). */
+    public function isGuru(): bool
+    {
+        return $this->hasRole('Guru/Organisasi');
+    }
+
+    /** URL foto profil, atau null bila belum ada (tampilan jatuh ke inisial). */
+    public function avatarUrl(): ?string
+    {
+        return $this->avatar ? asset('storage/' . $this->avatar) : null;
     }
 }

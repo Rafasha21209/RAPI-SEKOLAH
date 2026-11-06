@@ -11,10 +11,13 @@ use App\Models\User;
  */
 class EventPolicy
 {
-    /** Mengajukan agenda: Guru/Organisasi & Waka/Admin. */
+    /**
+     * Mengajukan agenda: Guru/Organisasi, Siswa & Waka/Admin.
+     * (Pembatasan jam sekolah untuk Siswa ditegakkan di EventController::store.)
+     */
     public function create(User $user): bool
     {
-        return $user->hasRole('Guru/Organisasi', 'Waka/Admin');
+        return $user->hasRole('Guru/Organisasi', 'Siswa', 'Waka/Admin');
     }
 
     /** Menyetujui / menolak pengajuan: hanya Waka/Admin, dan hanya selama masih pending. */

@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             ['id' => 1, 'role_name' => 'Waka/Admin'],
             ['id' => 2, 'role_name' => 'PIC Ruang'],
             ['id' => 3, 'role_name' => 'Guru/Organisasi'],
+            ['id' => 4, 'role_name' => 'Siswa'],
         ];
 
         foreach ($roles as $role) {
@@ -62,6 +63,16 @@ class DatabaseSeeder extends Seeder
                 'fullname' => 'Guru Pengajar',
                 'phone_number' => '081234567892',
                 'role_id' => 3,
+            ]
+        );
+
+        User::updateOrCreate(
+            ['username' => 'siswa'],
+            [
+                'password' => Hash::make('password'),
+                'fullname' => 'Siswa Contoh',
+                'phone_number' => '081234567894',
+                'role_id' => 4,
             ]
         );
 

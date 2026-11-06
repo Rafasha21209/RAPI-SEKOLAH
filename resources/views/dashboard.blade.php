@@ -46,6 +46,18 @@
                     <p>Laporkan kerusakan fasilitas ruangan dengan melampirkan foto bukti.</p>
                     <a href="{{ route('complaints.index') }}" class="btn-primary">Buka Modul Pengaduan &rarr;</a>
                 </div>
+
+            @elseif((Auth::user()->role->role_name ?? '') === 'Siswa')
+                <div class="card">
+                    <h3>Pengajuan Peminjaman Ruangan</h3>
+                    <p>Ajukan peminjaman ruangan untuk kegiatan siswa pada jam sekolah. Peminjaman di luar jam sekolah hanya dapat diajukan oleh guru.</p>
+                    <a href="{{ route('events.index') }}" class="btn-primary">Buka Modul Agenda &rarr;</a>
+                </div>
+                <div class="card">
+                    <h3>Kalender Sekolah</h3>
+                    <p>Lihat agenda sekolah, kegiatan, dan hari libur nasional.</p>
+                    <a href="{{ route('calendar') }}" class="btn-primary">Lihat Kalender &rarr;</a>
+                </div>
             @endif
         </div>
 

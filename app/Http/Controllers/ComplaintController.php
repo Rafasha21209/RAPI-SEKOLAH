@@ -50,7 +50,8 @@ class ComplaintController extends Controller
             $query->forPic($user->id);
         }
 
-        $complaints = $query->orderByDesc('reported_at')->get();
+        // Terbaru lebih dulu; data lama tetap dapat dibuka lewat halaman berikutnya.
+        $complaints = $query->orderByDesc('reported_at')->orderByDesc('id')->paginate(15)->withQueryString();
 
         // Pilihan ruangan pada form lapor.
         // PIC hanya butuh ruangannya; pelapor butuh semua ruangan aktif.

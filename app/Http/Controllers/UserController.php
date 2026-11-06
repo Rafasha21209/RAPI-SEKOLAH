@@ -45,6 +45,7 @@ class UserController extends Controller
             'email'        => ['nullable', 'email:rfc', 'max:150'],
             'role_id'      => ['required', 'integer', Rule::exists('roles', 'id')],
             'is_all_rooms_pic' => ['nullable', 'boolean'],
+            'pic_note'     => ['nullable', 'string', 'max:500'],
         ], [
             'fullname.required'     => 'Nama lengkap wajib diisi.',
             'fullname.max'          => 'Nama lengkap maksimal 100 karakter.',
@@ -59,6 +60,7 @@ class UserController extends Controller
             'email.email'           => 'Format email tidak valid.',
             'role_id.required'      => 'Role wajib dipilih.',
             'role_id.exists'        => 'Role yang dipilih tidak valid.',
+            'pic_note.max'          => 'Keterangan PIC maksimal 500 karakter.',
         ]);
 
         $user = User::create([
@@ -69,6 +71,7 @@ class UserController extends Controller
             'email'        => $validated['email'] ?? null,
             'role_id'      => (int) $validated['role_id'],
             'is_all_rooms_pic' => $request->boolean('is_all_rooms_pic'),
+            'pic_note'     => isset($validated['pic_note']) ? (trim($validated['pic_note']) ?: null) : null,
         ]);
 
         $user->load('role');
@@ -126,5 +129,26 @@ class UserController extends Controller
 
         return back()->with('success', 'Cakupan PIC "' . ($user->fullname ?? $user->username) . '" diperbarui: '
             . ($user->is_all_rooms_pic ? 'semua ruangan.' : 'hanya ruangan yang ditunjuk.'));
+    }
+
+    /**
+     * Mengisi / mengubah KETERANGAN PIC (tugas, tanggung jawab, catatan khusus).
+     * Hanya untuk user dengan role PIC Ruang.
+     */
+    public function updatePicNote(Request $request, User $user)
+    {
+        if (!$user->isPic()) {
+            return back()->with('error', 'Keterangan hanya dapat diisi untuk user dengan role PIC Ruang.');
+        }
+
+        $validated = $request->validate(
+            ['pic_note' => ['nullable', 'string', 'max:500']],
+            ['pic_note.max' => 'Keterangan PIC maksimal 500 karakter.']
+        );
+
+        $note = isset($validated['pic_note']) ? trim($validated['pic_note']) : '';
+        $user->update(['pic_note' => $note !== '' ? $note : null]);
+
+        return back()->with('success', 'Keterangan PIC "' . ($user->fullname ?? $user->username) . '" berhasil disimpan.');
     }
 }

@@ -54,6 +54,10 @@
                 <label><input type="checkbox" name="is_all_rooms_pic" value="1" {{ old('is_all_rooms_pic') ? 'checked' : '' }}> PIC semua ruangan (khusus role PIC Ruang)</label>
             </p>
             <p>
+                <label for="pic_note">Keterangan PIC (khusus role PIC Ruang — tugas, tanggung jawab, catatan khusus):</label><br>
+                <textarea id="pic_note" name="pic_note" rows="2" maxlength="500" style="width: 100%;">{{ old('pic_note') }}</textarea>
+            </p>
+            <p>
                 <label for="password">Password (minimal 8 karakter):</label><br>
                 <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password" style="width: 100%;">
             </p>
@@ -65,7 +69,7 @@
         </form>
     </fieldset>
 
-    <table class="table-stack" border="1" cellpadding="8" cellspacing="0" style="width: 100%; max-width: 900px; border-collapse: collapse;">
+    <table class="table-stack" border="1" cellpadding="8" cellspacing="0" style="width: 100%; max-width: 1100px; border-collapse: collapse;">
         <thead>
             <tr>
                 <th>Nama</th>
@@ -75,6 +79,7 @@
                 <th>Role Saat Ini</th>
                 <th>Ganti Role</th>
                 <th>Cakupan PIC</th>
+                <th>Keterangan PIC</th>
             </tr>
         </thead>
         <tbody>
@@ -111,10 +116,22 @@
                             -
                         @endif
                     </td>
+                    <td data-label="Keterangan PIC" class="td-actions">
+                        @if(($user->role->role_name ?? '') === 'PIC Ruang')
+                            <form action="{{ route('users.update-pic-note', $user->id) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <textarea name="pic_note" rows="3" maxlength="500" placeholder="Tugas / tanggung jawab / catatan khusus" style="font-size: 11px; width: 100%; max-width: 240px;">{{ $user->pic_note }}</textarea>
+                                <button type="submit" style="font-size: 11px;">Simpan</button>
+                            </form>
+                        @else
+                            -
+                        @endif
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" style="text-align: center;">Belum ada user.</td>
+                    <td colspan="8" style="text-align: center;">Belum ada user.</td>
                 </tr>
             @endforelse
         </tbody>

@@ -42,15 +42,18 @@ class ReportController extends Controller
             $put([($d['mode'] === 'daily' ? 'LAPORAN HARIAN' : 'LAPORAN BULANAN') . ' RAPI-SEKOLAH - ' . $d['periodLabel']]);
             $put([]);
             $put(['PEMINJAMAN RUANGAN']);
-            $put(['Tanggal', 'Sesi', 'Ruangan', 'Agenda', 'Peminjam', 'Status', 'Alasan Ditolak', 'Alasan Pindah']);
+            $put(['Tanggal', 'Sesi / Waktu', 'Ruangan', 'Nama Pengajuan', 'Kategori', 'Pengaju', 'Status', 'Tujuan Penggunaan', 'Keterangan', 'Alasan Ditolak', 'Alasan Pindah']);
             foreach ($d['events'] as $e) {
                 $put([
                     $e->date->format('d/m/Y'),
                     $e->sessionLabel(),
                     $e->room->room_name ?? '-',
                     $e->event_name,
+                    $e->category ?: 'Peminjaman Ruangan',
                     $e->user->fullname ?? $e->user->username ?? '-',
                     ucfirst($e->normalizedStatus() ?: 'pending'),
+                    $e->description ?? '',
+                    $e->notes ?? '',
                     $e->reject_reason ?? '',
                     $e->move_reason ?? '',
                 ]);
@@ -104,11 +107,13 @@ class ReportController extends Controller
             $periodLabel = $start->copy()->locale('id')->translatedFormat('F Y');
         }
 
-        $events = Event::with(['room', 'user'])
+        // Data terbaru ditampilkan lebih dulu (descending).
+        $events = Event::with(['room.pic', 'user'])
             ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
-            ->orderBy('date')
-            ->orderBy('start_session')
-            ->orderBy('start_time')
+            ->orderByDesc('date')
+            ->orderByDesc('start_session')
+            ->orderByDesc('start_time')
+            ->orderByDesc('id')
             ->get();
 
         // reported_at tersimpan dalam timezone aplikasi (UTC), jadi batas periode WIB dikonversi dulu.
@@ -118,7 +123,7 @@ class ReportController extends Controller
                 $start->copy()->timezone($appTz),
                 $end->copy()->timezone($appTz),
             ])
-            ->orderBy('reported_at')
+            ->orderByDesc('reported_at')
             ->get();
 
         $eventStats = [

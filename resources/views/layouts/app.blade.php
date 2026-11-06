@@ -4,6 +4,7 @@
     $isAdmin   = $roleName === 'Waka/Admin';
     $displayName = $authUser ? ($authUser->fullname ?: $authUser->username) : null;
     $initial   = $displayName ? mb_strtoupper(mb_substr($displayName, 0, 1)) : '';
+    $avatarUrl = $authUser?->avatarUrl();
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -122,7 +123,11 @@
             <div class="sidebar-footer">
                 @auth
                     <a href="{{ route('profile.show') }}" class="sidebar-user" style="text-decoration:none; color:inherit;" title="Lihat profil">
-                        <span class="sidebar-avatar" aria-hidden="true">{{ $initial }}</span>
+                        @if($avatarUrl)
+                            <img class="sidebar-avatar sidebar-avatar-img" src="{{ $avatarUrl }}" alt="" aria-hidden="true">
+                        @else
+                            <span class="sidebar-avatar" aria-hidden="true">{{ $initial }}</span>
+                        @endif
                         <span class="sidebar-user-text">
                             <strong>{{ $displayName }}</strong>
                             <small>{{ $roleName ?: '-' }}</small>
@@ -191,6 +196,9 @@
             </button>
         </nav>
     @endauth
+
+    {{-- Pratinjau foto di dalam aplikasi (lightbox) untuk semua halaman --}}
+    @include('partials.photo-lightbox')
 
     <script>
         if ('serviceWorker' in navigator) {

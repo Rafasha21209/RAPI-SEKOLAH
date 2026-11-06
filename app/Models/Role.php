@@ -23,6 +23,7 @@ class Role extends Model
         'Waka/Admin',
         'PIC Ruang',
         'Guru/Organisasi',
+        'Siswa',
     ];
 
     protected $fillable = [
