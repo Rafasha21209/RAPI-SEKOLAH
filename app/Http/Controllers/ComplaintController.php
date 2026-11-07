@@ -37,9 +37,24 @@ class ComplaintController extends Controller
      * - Waka/Admin     : seluruh pengaduan (monitoring).
      * - Guru/Organisasi: seluruh pengaduan (read-only + form lapor).
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+
+        // Filter daftar. Default status = "Belum Diperbaiki" (yang perlu ditangani lebih dulu).
+        // Jika pengguna memilih "Semua status", nilai status dikirim kosong -> tampil semua.
+        $status  = $request->has('status') ? (string) $request->query('status') : 'belum';
+        $keyword = trim((string) $request->query('q', ''));
+        $roomId  = (int) $request->query('room', 0);
+
+        $statusMap = [
+            'belum'     => Complaint::STATUS_BELUM,
+            'sparepart' => Complaint::STATUS_SPAREPART,
+            'selesai'   => Complaint::STATUS_SELESAI,
+        ];
+        if ($status !== '' && !isset($statusMap[$status])) {
+            $status = 'belum';
+        }
 
         $query = Complaint::with(['room.pic', 'pic', 'event', 'reporter', 'handler']);
 
@@ -50,18 +65,39 @@ class ComplaintController extends Controller
             $query->forPic($user->id);
         }
 
+        $query
+            ->when($status !== '', fn($q) => $q->where('status_repair', $statusMap[$status]))
+            ->when($roomId > 0, fn($q) => $q->where('room_id', $roomId))
+            ->when($keyword !== '', function ($q) use ($keyword) {
+                $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $keyword) . '%';
+                $q->where(function ($w) use ($like) {
+                    $w->where('description', 'like', $like)
+                        ->orWhereHas('room', fn($r) => $r->where('room_name', 'like', $like))
+                        ->orWhereHas('reporter', fn($u) => $u->where('fullname', 'like', $like)->orWhere('username', 'like', $like));
+                });
+            });
+
         // Terbaru lebih dulu; data lama tetap dapat dibuka lewat halaman berikutnya.
         $complaints = $query->orderByDesc('reported_at')->orderByDesc('id')->paginate(15)->withQueryString();
 
-        // Pilihan ruangan pada form lapor.
+        // Ringkasan jumlah per status (mengikuti batas akses PIC) untuk chip di atas daftar.
+        $countQuery = Complaint::query();
+        if ($user->isPic() && !$user->isAllRoomsPic()) {
+            $countQuery->forPic($user->id);
+        }
+        $counts = $countQuery->select('status_repair', DB::raw('COUNT(*) as total'))
+            ->groupBy('status_repair')
+            ->pluck('total', 'status_repair');
+
+        // Pilihan ruangan pada form lapor & filter.
         // PIC hanya butuh ruangannya; pelapor butuh semua ruangan aktif.
         $rooms = Room::with('pic')
             ->where('is_active', true)
-            ->when($user->isPic() && !$user->isAllRoomsPic(), fn ($q) => $q->where('pic_id', $user->id))
+            ->when($user->isPic() && !$user->isAllRoomsPic(), fn($q) => $q->where('pic_id', $user->id))
             ->orderBy('id')
             ->get();
 
-        return view('complaints.index', compact('complaints', 'rooms'));
+        return view('complaints.index', compact('complaints', 'rooms', 'status', 'keyword', 'roomId', 'counts'));
     }
 
     /**
@@ -70,7 +106,7 @@ class ComplaintController extends Controller
      * Validasi dilakukan di backend:
      *  - room_id wajib ada di tabel rooms (mencegah manipulasi room_id palsu)
      *  - deskripsi minimal 10 karakter
-     *  - foto wajib image, tipe jpeg/png/jpg, maksimal 2 MB
+     *  - foto wajib image, tipe jpeg/png/jpg, tanpa batas ukuran dari aplikasi
      */
     public function store(Request $request)
     {
@@ -81,7 +117,7 @@ class ComplaintController extends Controller
             'event_id'    => ['nullable', 'integer', Rule::exists('events', 'id')],
             'room_id'     => ['required_without:event_id', 'nullable', 'integer', Rule::exists('rooms', 'id')],
             'description' => ['required', 'string', 'min:10', 'max:1000'],
-            'photo'       => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'photo'       => ['required', 'image', 'mimes:jpeg,png,jpg'],
         ], [
             'room_id.required'     => 'Ruangan wajib dipilih.',
             'room_id.exists'       => 'Ruangan yang dipilih tidak valid.',
@@ -90,7 +126,6 @@ class ComplaintController extends Controller
             'photo.required'       => 'Foto bukti fisik wajib diunggah.',
             'photo.image'          => 'File yang diunggah harus berupa gambar.',
             'photo.mimes'          => 'Format foto harus JPG, JPEG, atau PNG.',
-            'photo.max'            => 'Ukuran foto maksimal 2 MB.',
         ]);
 
         // Laporan dari peminjaman: data ruangan + pelapor (peminjam) otomatis dari event.
@@ -176,15 +211,16 @@ class ComplaintController extends Controller
             'note'          => ['nullable', 'string', 'max:255'],
             // Foto bukti perbaikan WAJIB saat status diubah menjadi "Sudah Diperbaiki".
             'repair_photo'  => [
-                Rule::requiredIf(fn () => $request->input('status_repair') === Complaint::STATUS_SELESAI),
-                'nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048',
+                Rule::requiredIf(fn() => $request->input('status_repair') === Complaint::STATUS_SELESAI),
+                'nullable',
+                'image',
+                'mimes:jpeg,png,jpg',
             ],
         ], [
             'status_repair.in'      => 'Status perbaikan tidak valid.',
             'repair_photo.required' => 'Foto bukti perbaikan wajib diunggah saat status "Sudah Diperbaiki".',
             'repair_photo.image'    => 'Bukti perbaikan harus berupa gambar.',
             'repair_photo.mimes'    => 'Format foto harus JPG, JPEG, atau PNG.',
-            'repair_photo.max'      => 'Ukuran foto maksimal 2 MB.',
         ]);
 
         $statusBaru = $validated['status_repair'];

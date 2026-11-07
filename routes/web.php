@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
@@ -59,9 +60,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Profil user yang login (nama, email, nomor HP)
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
@@ -71,6 +70,10 @@ Route::middleware('auth')->group(function () {
     // Notifikasi milik user yang login
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+    // Waka/Admin mengirim notifikasi ke PIC Ruang (dicek ulang di NotificationController::send).
+    Route::post('/notifications/send', [NotificationController::class, 'send'])
+        ->middleware('role:Waka/Admin')
+        ->name('notifications.send');
 
     // Halaman list bersama (Read-only / index) - semua role yang login bisa lihat
     Route::get('/events', [EventController::class, 'index'])->name('events.index');
