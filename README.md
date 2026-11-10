@@ -40,8 +40,6 @@ Lalu buka http://localhost:8000
 
 ## Akun Contoh
 
-Semua password: `password`
-
 | Peran | Username |
 |---|---|
 | Waka/Admin | admin |
