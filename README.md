@@ -51,7 +51,7 @@ Ganti password ini jika aplikasi dipakai sungguhan.
 
 ## Teknologi
 
-- Laravel 13, PHP 8.3
+- Laravel 13, PHP 8.5.9
 - SQLite
 - Blade, Tailwind CSS, Vite
 - FullCalendar
